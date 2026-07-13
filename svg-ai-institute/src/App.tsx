@@ -11,6 +11,11 @@ import { SignInPage } from './features/auth/SignInPage'
 import { DashboardPage } from './features/dashboard/DashboardPage'
 import { ApplicationsPage } from './features/admissions/ApplicationsPage'
 import { CohortsPage } from './features/admissions/CohortsPage'
+import { CourseBuilderPage } from './features/learning/CourseBuilderPage'
+import { LearnPage } from './features/learning/LearnPage'
+import { LessonPlayerPage } from './features/learning/LessonPlayerPage'
+import { RoomDetailPage } from './features/learning/RoomDetailPage'
+import { RoomsPage } from './features/learning/RoomsPage'
 import { AboutPage } from './features/public/AboutPage'
 import { ApplyPage } from './features/public/ApplyPage'
 import { ApplyStatusPage } from './features/public/ApplyStatusPage'
@@ -60,6 +65,32 @@ export default function App() {
             }
           >
             <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/learn" element={<LearnPage />} />
+            <Route path="/learn/lesson/:lessonId" element={<LessonPlayerPage />} />
+            <Route
+              path="/admin/rooms"
+              element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <RoomsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/rooms/:id"
+              element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <RoomDetailPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/courses/:id"
+              element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <CourseBuilderPage />
+                </ProtectedRoute>
+              }
+            />
             <Route
               path="/admin/applications"
               element={

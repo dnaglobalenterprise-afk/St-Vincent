@@ -36,6 +36,7 @@ export type Cohort = {
   end_date: string
   capacity: number
   status: CohortStatus
+  room_id: string | null
   created_at: string
   updated_at: string
 }
@@ -79,6 +80,98 @@ export type Enrollment = {
   created_at: string
 }
 
+export type RoomStatus = 'draft' | 'active' | 'archived'
+export type CourseStatus = 'draft' | 'published'
+export type LessonType = 'video' | 'text' | 'quiz' | 'assignment' | 'replay'
+export type VideoStatus = 'none' | 'processing' | 'ready' | 'errored'
+
+export type Room = {
+  id: string
+  name: string
+  slug: string
+  description: string | null
+  status: RoomStatus
+  created_at: string
+  updated_at: string
+}
+
+export type Course = {
+  id: string
+  room_id: string
+  title: string
+  description: string | null
+  status: CourseStatus
+  created_at: string
+  updated_at: string
+}
+
+export type Module = {
+  id: string
+  course_id: string
+  title: string
+  sort_order: number
+  unlock_date: string | null
+  created_at: string
+  updated_at: string
+}
+
+export type Lesson = {
+  id: string
+  module_id: string
+  type: LessonType
+  title: string
+  sort_order: number
+  required: boolean
+  published: boolean
+  body_markdown: string | null
+  mux_upload_id: string | null
+  mux_playback_id: string | null
+  video_status: VideoStatus
+  duration_seconds: number | null
+  pass_threshold: number | null
+  created_at: string
+  updated_at: string
+}
+
+export type QuizQuestion = {
+  id: string
+  lesson_id: string
+  prompt: string
+  options: string[]
+  correct_idx: number
+  sort_order: number
+}
+
+export type QuizAttempt = {
+  id: string
+  lesson_id: string
+  user_id: string
+  answers: number[]
+  score_pct: number
+  passed: boolean
+  created_at: string
+}
+
+export type LessonProgress = {
+  id: string
+  lesson_id: string
+  user_id: string
+  completed_at: string
+}
+
+export type LessonContent = {
+  id: string
+  module_id: string
+  type: LessonType
+  title: string
+  body_markdown: string | null
+  mux_playback_id: string | null
+  video_status: VideoStatus
+  duration_seconds: number | null
+  pass_threshold: number | null
+  questions: { id: string; prompt: string; options: string[]; sort_order: number }[]
+}
+
 export type Database = {
   public: {
     Tables: {
@@ -113,6 +206,49 @@ export type Database = {
         Row: Enrollment
         Insert: Pick<Enrollment, 'cohort_id' | 'user_id'> & Partial<Enrollment>
         Update: Partial<Enrollment>
+        Relationships: []
+      }
+      rooms: {
+        Row: Room
+        Insert: Pick<Room, 'name' | 'slug'> & Partial<Room>
+        Update: Partial<Room>
+        Relationships: []
+      }
+      courses: {
+        Row: Course
+        Insert: Pick<Course, 'room_id' | 'title'> & Partial<Course>
+        Update: Partial<Course>
+        Relationships: []
+      }
+      modules: {
+        Row: Module
+        Insert: Pick<Module, 'course_id' | 'title' | 'sort_order'> & Partial<Module>
+        Update: Partial<Module>
+        Relationships: []
+      }
+      lessons: {
+        Row: Lesson
+        Insert: Pick<Lesson, 'module_id' | 'type' | 'title' | 'sort_order'> & Partial<Lesson>
+        Update: Partial<Lesson>
+        Relationships: []
+      }
+      quiz_questions: {
+        Row: QuizQuestion
+        Insert: Pick<QuizQuestion, 'lesson_id' | 'prompt' | 'options' | 'correct_idx' | 'sort_order'> &
+          Partial<QuizQuestion>
+        Update: Partial<QuizQuestion>
+        Relationships: []
+      }
+      quiz_attempts: {
+        Row: QuizAttempt
+        Insert: never
+        Update: never
+        Relationships: []
+      }
+      lesson_progress: {
+        Row: LessonProgress
+        Insert: never
+        Update: never
         Relationships: []
       }
       interest_signups: {
@@ -170,6 +306,22 @@ export type Database = {
       submit_application: {
         Args: { p: Record<string, unknown> }
         Returns: string
+      }
+      get_lesson_content: {
+        Args: { p_lesson_id: string }
+        Returns: LessonContent[]
+      }
+      submit_quiz: {
+        Args: { p_lesson_id: string; p_answers: number[] }
+        Returns: { score_pct: number; passed: boolean; wrong_indexes: number[] }[]
+      }
+      mark_lesson_complete: {
+        Args: { p_lesson_id: string }
+        Returns: undefined
+      }
+      is_module_unlocked: {
+        Args: { p_module_id: string }
+        Returns: boolean
       }
     }
     Enums: {

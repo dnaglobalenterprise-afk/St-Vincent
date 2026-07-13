@@ -1,58 +1,40 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { GraduationCap, MessagesSquare, TrendingUp } from 'lucide-react'
 import { Badge } from '../../components/ui/Badge'
+import { Button } from '../../components/ui/Button'
 import { Card } from '../../components/ui/Card'
 import { EmptyState } from '../../components/ui/EmptyState'
 import { PageHeader } from '../../components/ui/PageHeader'
 import { RoleBadge } from '../../components/layout/Sidebar'
-import { supabase } from '../../lib/supabase'
+import { loadProgram, moduleStates, progressSummary } from '../learning/program'
+import type { ProgramData } from '../learning/program'
 import { useAuth } from '../auth/useAuth'
-
-interface EnrolledCohort {
-  name: string
-  start_date: string
-  end_date: string
-}
-
-function programLine(cohort: EnrolledCohort): string {
-  const start = new Date(cohort.start_date + 'T00:00:00')
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-  if (today < start) {
-    const days = Math.ceil((start.getTime() - today.getTime()) / 86400000)
-    return days === 1 ? 'Starts tomorrow' : `Starts in ${days} days`
-  }
-  const week = Math.floor((today.getTime() - start.getTime()) / (7 * 86400000)) + 1
-  return `In progress — Week ${week}`
-}
 
 export function DashboardPage() {
   const { profile, role } = useAuth()
-  const [cohort, setCohort] = useState<EnrolledCohort | null>(null)
+  const navigate = useNavigate()
+  const [program, setProgram] = useState<ProgramData | null>(null)
   const [checked, setChecked] = useState(false)
 
   useEffect(() => {
     if (!profile) return
     let cancelled = false
-    supabase
-      .from('enrollments')
-      .select('status, cohorts(name, start_date, end_date)')
-      .eq('user_id', profile.id)
-      .eq('status', 'active')
-      .limit(1)
-      .maybeSingle()
-      .then(({ data }) => {
-        if (cancelled) return
-        const c = (data as { cohorts?: EnrolledCohort } | null)?.cohorts
-        setCohort(c ?? null)
-        setChecked(true)
-      })
+    loadProgram(profile.id).then((data) => {
+      if (cancelled) return
+      setProgram(data)
+      setChecked(true)
+    })
     return () => {
       cancelled = true
     }
   }, [profile])
 
   const firstName = profile?.first_name ?? profile?.email.split('@')[0] ?? ''
+  const summary = program ? progressSummary(program) : null
+  const states = program ? moduleStates(program) : []
+  const currentModule = program && summary ? program.modules[summary.currentWeekIndex] : null
+  const completedWeeks = states.filter((s) => s === 'completed').length
 
   return (
     <div className="flex flex-col gap-8">
@@ -63,16 +45,39 @@ export function DashboardPage() {
       />
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
         <Card header="Your Program">
-          {cohort ? (
+          {program && summary ? (
             <div className="flex flex-col gap-3" data-testid="enrollment-card">
               <Badge variant="green" className="self-start">
                 Enrolled
               </Badge>
-              <p className="font-heading text-xl font-semibold text-ink">{cohort.name}</p>
-              <p className="text-base text-ink-muted">
-                Starts {new Date(cohort.start_date + 'T00:00:00').toLocaleDateString()}
+              <p className="font-heading text-xl font-semibold text-ink">{program.course.title}</p>
+              <p className="text-base font-medium text-svgblue-500">
+                Week {Math.min(completedWeeks + 1, program.modules.length)} of {program.modules.length}
+                {currentModule ? ` — ${currentModule.title.replace(/^Week \d+ — /, '')}` : ''}
               </p>
-              <p className="text-base font-medium text-svgblue-500">{programLine(cohort)}</p>
+              <div className="flex flex-col gap-1.5">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-ink-muted">
+                    {summary.completedCount} of {summary.totalCount} lessons
+                  </span>
+                  <span className="text-ink-muted">{summary.percent}%</span>
+                </div>
+                <div className="h-2 overflow-hidden rounded-full bg-svgblue-100">
+                  <div
+                    className="h-full bg-svggreen-500 transition-all duration-200"
+                    style={{ width: `${summary.percent}%` }}
+                  />
+                </div>
+              </div>
+              {summary.continueLessonId && (
+                <Button
+                  size="sm"
+                  className="self-start"
+                  onClick={() => navigate(`/learn/lesson/${summary.continueLessonId}`)}
+                >
+                  Continue
+                </Button>
+              )}
             </div>
           ) : (
             checked && <EmptyState icon={GraduationCap} message="Coming soon in your program" />

@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from 'react-router-dom'
-import { CalendarDays, Inbox, LayoutDashboard, LogOut } from 'lucide-react'
+import { BookOpen, CalendarDays, Inbox, LayoutDashboard, LogOut, School } from 'lucide-react'
 import { Badge } from '../ui/Badge'
 import type { Role } from '../../lib/types'
 import { useAuth } from '../../features/auth/useAuth'
@@ -32,10 +32,16 @@ export function Sidebar() {
   const navigate = useNavigate()
 
   const staffLinks = [
+    { to: '/learn', label: 'Program', icon: BookOpen },
     ...(role === 'admin' || role === 'instructor'
       ? [{ to: '/admin/applications', label: 'Applications', icon: Inbox }]
       : []),
-    ...(role === 'admin' ? [{ to: '/admin/cohorts', label: 'Cohorts', icon: CalendarDays }] : []),
+    ...(role === 'admin'
+      ? [
+          { to: '/admin/cohorts', label: 'Cohorts', icon: CalendarDays },
+          { to: '/admin/rooms', label: 'Rooms', icon: School },
+        ]
+      : []),
   ]
 
   const handleSignOut = async () => {
