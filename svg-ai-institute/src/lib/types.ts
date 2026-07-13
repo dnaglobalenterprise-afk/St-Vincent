@@ -1,6 +1,6 @@
 export type Role = 'student' | 'instructor' | 'admin' | 'business_partner'
 
-export interface Profile {
+export type Profile = {
   id: string
   email: string
   first_name: string | null
@@ -11,9 +11,45 @@ export interface Profile {
   updated_at: string
 }
 
+export type InterestAudience = 'student' | 'business'
+
+export type InterestSignup = {
+  id: string
+  audience: InterestAudience
+  email: string
+  contact_name: string | null
+  business_name: string | null
+  whatsapp: string | null
+  business_type: string | null
+  pain_point: string | null
+  created_at: string
+}
+
 export type Database = {
   public: {
     Tables: {
+      interest_signups: {
+        Row: InterestSignup
+        Insert: {
+          id?: string
+          audience: InterestAudience
+          email: string
+          contact_name?: string | null
+          business_name?: string | null
+          whatsapp?: string | null
+          business_type?: string | null
+          pain_point?: string | null
+        }
+        Update: {
+          email?: string
+          contact_name?: string | null
+          business_name?: string | null
+          whatsapp?: string | null
+          business_type?: string | null
+          pain_point?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: Profile
         Insert: {
@@ -43,6 +79,7 @@ export type Database = {
     }
     Enums: {
       user_role: Role
+      interest_audience: InterestAudience
     }
     CompositeTypes: Record<string, never>
   }
