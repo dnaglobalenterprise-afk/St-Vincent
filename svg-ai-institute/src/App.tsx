@@ -29,6 +29,9 @@ import { PartnerPortalPage } from './features/capstone/PartnerPortalPage'
 import { CoachPage } from './features/coach/CoachPage'
 import { CommunityPage } from './features/community/CommunityPage'
 import { LeaderboardPage } from './features/gamification/LeaderboardPage'
+import { NotificationsPage } from './features/notifications/NotificationsPage'
+import { SettingsNotificationsPage } from './features/notifications/SettingsNotificationsPage'
+import { AnnouncementsPage } from './features/notifications/AnnouncementsPage'
 import { OutcomesBoardPage } from './features/outcomes/OutcomesBoardPage'
 import { ShowcasePage } from './features/outcomes/ShowcasePage'
 import { ShowcaseAdminPage } from './features/outcomes/ShowcaseAdminPage'
@@ -97,6 +100,8 @@ export default function App() {
             <Route path="/learn/replays/:id" element={<ReplayPlayerPage />} />
             <Route path="/learn/capstone" element={<CapstoneHubPage />} />
             <Route path="/community" element={<CommunityPage />} />
+            <Route path="/notifications" element={<NotificationsPage />} />
+            <Route path="/settings/notifications" element={<SettingsNotificationsPage />} />
             <Route path="/learn/leaderboard" element={<LeaderboardPage />} />
             <Route path="/learn/coach" element={<CoachPage />} />
             <Route
@@ -152,6 +157,14 @@ export default function App() {
               element={
                 <ProtectedRoute allowedRoles={['admin', 'instructor']}>
                   <ReviewQueuePage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/teach/announcements"
+              element={
+                <ProtectedRoute allowedRoles={['admin', 'instructor']}>
+                  <AnnouncementsPage />
                 </ProtectedRoute>
               }
             />

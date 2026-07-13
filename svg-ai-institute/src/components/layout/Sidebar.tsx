@@ -9,9 +9,11 @@ import {
   Inbox,
   LayoutDashboard,
   LogOut,
+  Megaphone,
   MessagesSquare,
   Rocket,
   School,
+  Settings,
   Sparkles,
   Trophy,
   Video,
@@ -64,6 +66,7 @@ export function Sidebar() {
           { to: '/teach/capstones', label: 'Capstones', icon: Award },
           { to: '/admin/showcase', label: 'Showcase', icon: Clapperboard },
           { to: '/teach/classes', label: 'Manage Classes', icon: CalendarDays },
+          { to: '/teach/announcements', label: 'Announcements', icon: Megaphone },
           { to: '/teach/review', label: 'Review', icon: ClipboardCheck },
           { to: '/admin/applications', label: 'Applications', icon: Inbox },
         ]
@@ -115,14 +118,15 @@ export function Sidebar() {
           </button>
         </nav>
         {profile && role && (
-          <div className="flex flex-col gap-2 border-t border-line px-6 py-4">
+          <NavLink to="/settings/notifications" className="flex flex-col gap-2 border-t border-line px-6 py-4 hover:bg-svgblue-50">
             <span className="truncate text-sm font-medium text-ink">
               {displayName(profile.first_name, profile.last_name, profile.email)}
             </span>
-            <span>
+            <span className="flex items-center gap-2">
               <RoleBadge role={role} />
+              <Settings className="h-4 w-4 text-ink-muted" aria-hidden="true" />
             </span>
-          </div>
+          </NavLink>
         )}
       </aside>
 

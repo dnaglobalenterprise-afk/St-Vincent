@@ -2,6 +2,7 @@ import { Outlet } from 'react-router-dom'
 import { Sidebar, RoleBadge } from './Sidebar'
 import { useAuth } from '../../features/auth/useAuth'
 import { PointToasts } from '../../features/gamification/PointToasts'
+import { NotificationBell } from '../../features/notifications/NotificationBell'
 
 export function AppLayout() {
   const { profile, role } = useAuth()
@@ -14,7 +15,14 @@ export function AppLayout() {
         {/* Mobile top bar */}
         <header className="flex items-center justify-between border-b border-line bg-white px-4 py-3 md:hidden">
           <span className="font-heading text-base font-bold text-svgblue-500">SVG AI Institute</span>
-          {role && <RoleBadge role={role} />}
+          <div className="flex items-center gap-2">
+            <NotificationBell />
+            {role && <RoleBadge role={role} />}
+          </div>
+        </header>
+        {/* Desktop top bar — bell lives here since the sidebar has no header slot */}
+        <header className="hidden items-center justify-end border-b border-line bg-white px-6 py-2.5 md:flex">
+          <NotificationBell />
         </header>
         <main className="flex-1 px-4 py-6 pb-24 sm:px-6 md:px-8 md:pb-6">
           <div className="mx-auto max-w-5xl">

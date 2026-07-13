@@ -100,3 +100,19 @@ topics. Coach chats are private even from staff (no staff RLS policy).
 **Setup:** paste an Anthropic key into `ANTHROPIC_API_KEY` in `.env.local`, then
 push it to the function secret. Until it's set, the coach returns a graceful
 "not configured yet" message instead of erroring.
+
+## Notifications & Email (PRD 11)
+
+Two channels close every "tell the user" moment:
+
+- **In-app:** a live bell (Supabase Realtime on `notifications`) fed by DB triggers on real events. Private per-user (RLS own-only).
+- **Email via Resend, outbox pattern:** triggers write `email_outbox` rows; the `process-email-outbox` Edge Function drains them. No email is sent from a trigger, so a Resend outage never breaks a platform action. Retries back off +2/+10/+60 min, then `failed` after 4 attempts. Preference-respecting at enqueue (`notification_prefs`); applicant decision emails bypass prefs (no account).
+
+**Edge Functions & Supabase Cron:**
+
+| Function | Cron | Purpose |
+|---|---|---|
+| `process-email-outbox` | `* * * * *` | Claim (SKIP LOCKED lease) + send due outbox rows via Resend. |
+| `class-reminders` | `*/15 * * * *` | Remind the audience ~60 min before a live class; exactly-once via `class_reminders_sent`. |
+
+Cron jobs are scheduled with `pg_cron` + `pg_net` (they POST the function URLs with the anon key). Env secrets: `RESEND_API_KEY`, `EMAIL_FROM` (a verified Resend sender), `SITE_URL`. Until `RESEND_API_KEY` is set the processor skips gracefully (rows stay `pending`). Every template has an HTML part (three-stripe blue/gold/green header, one blue button, "Manage email preferences" footer → `/settings/notifications`) and a plain-text part.

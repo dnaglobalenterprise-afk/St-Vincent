@@ -27,7 +27,7 @@ export function PointToasts() {
     })
 
     const sub = supabase
-      .channel(`points-${profile.id}`)
+      .channel(`points-${profile.id}-${crypto.randomUUID()}`)
       .on(
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'point_events', filter: `user_id=eq.${profile.id}` },

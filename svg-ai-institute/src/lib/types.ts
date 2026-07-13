@@ -435,9 +435,47 @@ export type CoachMessage = {
   created_at: string
 }
 
+export type Notification = {
+  id: string
+  user_id: string
+  type: string
+  title: string
+  body: string | null
+  link: string | null
+  read_at: string | null
+  created_at: string
+}
+
+export type NotificationPrefs = {
+  user_id: string
+  email_reviews: boolean
+  email_classes: boolean
+  email_community: boolean
+  email_announcements: boolean
+}
+
+export type Announcement = {
+  id: string
+  author_id: string
+  room_id: string
+  cohort_id: string | null
+  title: string
+  body: string
+  sent_count: number
+  created_at: string
+}
+
 export type Database = {
   public: {
     Tables: {
+      notifications: { Row: Notification; Insert: never; Update: { read_at?: string | null }; Relationships: [] }
+      notification_prefs: {
+        Row: NotificationPrefs
+        Insert: never
+        Update: Partial<Omit<NotificationPrefs, 'user_id'>>
+        Relationships: []
+      }
+      announcements: { Row: Announcement; Insert: never; Update: never; Relationships: [] }
       coach_conversations: {
         Row: CoachConversation
         Insert: never
@@ -787,6 +825,10 @@ export type Database = {
         Returns: { id: string; name: string; role: Role; cohort: string | null }[]
       }
       coach_messages_today: { Args: { p_user_id: string }; Returns: number }
+      send_announcement: {
+        Args: { p_room_id: string; p_cohort_id: string | null; p_title: string; p_body: string }
+        Returns: number
+      }
       user_points: { Args: { p_user_id: string }; Returns: number }
       user_level: { Args: { p_points: number }; Returns: number }
       get_leaderboard: {

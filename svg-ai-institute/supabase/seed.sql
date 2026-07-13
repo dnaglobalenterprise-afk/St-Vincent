@@ -450,3 +450,40 @@ begin
       (v_conv, 'user', 'A restaurant taking orders on WhatsApp one by one.', null, null);
   end if;
 end $$;
+
+-- ============================================
+-- PRD 11 seed: prefs backfill, 3 unread notifications, 1 pending outbox row,
+-- 1 sent announcement (so the bell, list, processor, and history are all live)
+-- ============================================
+insert into public.notification_prefs (user_id) select id from public.profiles on conflict do nothing;
+
+do $$
+declare v_user uuid; v_room uuid; v_admin uuid; v_les uuid;
+begin
+  select id into v_user from public.profiles where email='student@test.local';
+  select id into v_admin from public.profiles where role='admin' limit 1;
+  select id into v_room from public.rooms where slug='ai-automation';
+  select l.id into v_les from public.lessons l join public.modules m on m.id=l.module_id
+    where m.title='Week 1 — AI Fundamentals' and l.type='assignment' limit 1;
+  if v_user is null then return; end if;
+
+  -- 3 unread notifications of different types (idempotent guard by title)
+  if not exists (select 1 from public.notifications where user_id=v_user and title='Assignment approved ✓') then
+    perform public.notify(v_user, 'assignment_reviewed', 'Assignment approved ✓', 'Your Week 1 build passed', '/learn/lesson/'||coalesce(v_les::text,''));
+    perform public.notify(v_user, 'announcement', 'Welcome to Cohort 1', 'Live class Thursday 6pm AST — come ready to build.', '/dashboard');
+    perform public.notify(v_user, 'class_reminder', 'Class soon: Intro to Automation', 'Starts Thu 6:00 PM AST', '/learn/classes');
+  end if;
+
+  -- 1 pending outbox row with a fake payload (so a processor run is observable)
+  if not exists (select 1 from public.email_outbox where template='announcement' and to_email='student@test.local') then
+    insert into public.email_outbox (to_email, template, payload)
+      values ('student@test.local', 'announcement',
+        jsonb_build_object('title','Welcome to Cohort 1','body','We are so glad you are here. **Live class Thursday 6pm AST.**','first_name','Stu'));
+  end if;
+
+  -- 1 sent announcement in history
+  if v_admin is not null and not exists (select 1 from public.announcements where title='Welcome to Cohort 1') then
+    insert into public.announcements (author_id, room_id, cohort_id, title, body, sent_count)
+      values (v_admin, v_room, null, 'Welcome to Cohort 1', 'We are so glad you are here. Live class Thursday 6pm AST — come ready to build.', 3);
+  end if;
+end $$;
