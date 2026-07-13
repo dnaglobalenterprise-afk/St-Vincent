@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Award, GraduationCap, MessagesSquare, TrendingUp } from 'lucide-react'
+import { Award, GraduationCap, MessagesSquare } from 'lucide-react'
 import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
 import { Card } from '../../components/ui/Card'
 import { EmptyState } from '../../components/ui/EmptyState'
 import { PageHeader } from '../../components/ui/PageHeader'
 import { RoleBadge } from '../../components/layout/Sidebar'
+import { GamificationCard } from '../gamification/GamificationCard'
 import { loadProgram, moduleStates, progressSummary } from '../learning/program'
 import type { ProgramData } from '../learning/program'
 import { supabase } from '../../lib/supabase'
@@ -115,9 +116,7 @@ export function DashboardPage() {
         <Card header="Community">
           <EmptyState icon={MessagesSquare} message="Coming soon in your program" />
         </Card>
-        <Card header="Your Progress">
-          <EmptyState icon={TrendingUp} message="Coming soon in your program" />
-        </Card>
+        <GamificationCard />
       </div>
     </div>
   )

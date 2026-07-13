@@ -27,6 +27,7 @@ import { CapstoneHubPage } from './features/capstone/CapstoneHubPage'
 import { CapstonesReviewPage } from './features/capstone/CapstonesReviewPage'
 import { PartnerPortalPage } from './features/capstone/PartnerPortalPage'
 import { CommunityPage } from './features/community/CommunityPage'
+import { LeaderboardPage } from './features/gamification/LeaderboardPage'
 import { OutcomesBoardPage } from './features/outcomes/OutcomesBoardPage'
 import { ShowcasePage } from './features/outcomes/ShowcasePage'
 import { ShowcaseAdminPage } from './features/outcomes/ShowcaseAdminPage'
@@ -95,6 +96,7 @@ export default function App() {
             <Route path="/learn/replays/:id" element={<ReplayPlayerPage />} />
             <Route path="/learn/capstone" element={<CapstoneHubPage />} />
             <Route path="/community" element={<CommunityPage />} />
+            <Route path="/learn/leaderboard" element={<LeaderboardPage />} />
             <Route
               path="/partner"
               element={

@@ -379,3 +379,52 @@ begin
       (conv, stu, 'Yes please! That would help a lot. When are you free?', now() - interval '2 days' + interval '1 hour');
   end if;
 end $$;
+
+-- ============================================
+-- PRD 09 seed: backfill point events across the test student's existing history
+-- (source rows predate the gamification triggers). Mirrors the trigger logic.
+-- ============================================
+
+do $$ declare r record; begin
+  for r in select lp.user_id, lp.lesson_id, l.type
+           from public.lesson_progress lp join public.lessons l on l.id = lp.lesson_id
+           join public.profiles p on p.id = lp.user_id and p.role = 'student' loop
+    perform public.award_points(r.user_id,
+      case r.type when 'video' then 'lesson_video' when 'text' then 'lesson_text'
+                  when 'quiz' then 'quiz_pass' when 'assignment' then 'assignment_approved'
+                  when 'replay' then 'lesson_replay' end,
+      case r.type when 'video' then 10 when 'text' then 10 when 'quiz' then 15
+                  when 'assignment' then 25 when 'replay' then 5 end, r.lesson_id);
+    perform public.award_badge(r.user_id, 'first-steps');
+    if r.type = 'quiz' then perform public.award_badge(r.user_id, 'quiz-whiz'); end if;
+    if r.type = 'assignment' then perform public.award_badge(r.user_id, 'shipped-it'); end if;
+  end loop;
+end $$;
+
+do $$ declare r record; begin
+  for r in select user_id, lesson_id from public.quiz_attempts qa join public.profiles p on p.id=qa.user_id and p.role='student' where qa.passed and qa.score_pct = 100 loop
+    perform public.award_points(r.user_id, 'quiz_perfect', 10, r.lesson_id);
+    perform public.award_badge(r.user_id, 'sharpshooter');
+  end loop;
+end $$;
+
+do $$ declare r record; begin
+  for r in select user_id, class_id from public.class_attendance ca join public.profiles p on p.id=ca.user_id and p.role='student' loop
+    perform public.award_points(r.user_id, 'class_attended', 15, r.class_id);
+    perform public.award_badge(r.user_id, 'front-row');
+  end loop;
+end $$;
+
+do $$ declare r record; begin
+  for r in select user_id, id from public.capstone_projects cp join public.profiles p on p.id=cp.user_id and p.role='student' where cp.status='verified' loop
+    perform public.award_points(r.user_id, 'capstone_verified', 100, r.id);
+    perform public.award_badge(r.user_id, 'deployed');
+  end loop;
+end $$;
+
+do $$ declare r record; begin
+  for r in select user_id, id from public.enrollments e join public.profiles p on p.id=e.user_id and p.role='student' where e.status='graduated' loop
+    perform public.award_points(r.user_id, 'graduated', 150, r.id);
+    perform public.award_badge(r.user_id, 'graduate');
+  end loop;
+end $$;

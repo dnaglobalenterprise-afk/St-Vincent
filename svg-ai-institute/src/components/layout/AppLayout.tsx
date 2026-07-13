@@ -1,12 +1,14 @@
 import { Outlet } from 'react-router-dom'
 import { Sidebar, RoleBadge } from './Sidebar'
 import { useAuth } from '../../features/auth/useAuth'
+import { PointToasts } from '../../features/gamification/PointToasts'
 
 export function AppLayout() {
   const { profile, role } = useAuth()
 
   return (
     <div className="flex min-h-screen bg-surface-page">
+      <PointToasts />
       <Sidebar />
       <div className="flex min-w-0 flex-1 flex-col">
         {/* Mobile top bar */}

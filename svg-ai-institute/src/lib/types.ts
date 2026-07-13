@@ -387,9 +387,42 @@ export type UserMute = {
   created_at: string
 }
 
+export type PointEvent = {
+  id: string
+  user_id: string
+  kind: string
+  points: number
+  ref_id: string | null
+  created_at: string
+}
+
+export type Streak = {
+  user_id: string
+  current_streak: number
+  longest_streak: number
+  last_activity_date: string | null
+}
+
+export type BadgeDef = {
+  slug: string
+  name: string
+  description: string
+  icon: string
+}
+
+export type BadgeAward = {
+  user_id: string
+  badge_slug: string
+  awarded_at: string
+}
+
 export type Database = {
   public: {
     Tables: {
+      point_events: { Row: PointEvent; Insert: never; Update: never; Relationships: [] }
+      streaks: { Row: Streak; Insert: never; Update: never; Relationships: [] }
+      badges: { Row: BadgeDef; Insert: never; Update: never; Relationships: [] }
+      badge_awards: { Row: BadgeAward; Insert: never; Update: never; Relationships: [] }
       channels: {
         Row: Channel
         Insert: Pick<Channel, 'room_id' | 'name'> & Partial<Channel>
@@ -726,6 +759,20 @@ export type Database = {
       get_room_members: {
         Args: { p_room_id: string }
         Returns: { id: string; name: string; role: Role; cohort: string | null }[]
+      }
+      user_points: { Args: { p_user_id: string }; Returns: number }
+      user_level: { Args: { p_points: number }; Returns: number }
+      get_leaderboard: {
+        Args: { p_room_id: string; p_cohort_id: string | null }
+        Returns: {
+          rank: number
+          display_name: string
+          level: number
+          points: number
+          badge_count: number
+          current_streak: number
+          is_me: boolean
+        }[]
       }
       is_module_unlocked: {
         Args: { p_module_id: string }
