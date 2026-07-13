@@ -1,12 +1,15 @@
 import { NavLink, useNavigate } from 'react-router-dom'
 import {
+  Award,
   BookOpen,
+  Building2,
   CalendarDays,
   ClipboardCheck,
   Clapperboard,
   Inbox,
   LayoutDashboard,
   LogOut,
+  Rocket,
   School,
   Video,
 } from 'lucide-react'
@@ -42,11 +45,17 @@ export function Sidebar() {
   const navigate = useNavigate()
 
   const staffLinks = [
-    { to: '/learn', label: 'Program', icon: BookOpen },
-    { to: '/learn/classes', label: 'Classes', icon: Video },
-    { to: '/learn/replays', label: 'Replays', icon: Clapperboard },
+    ...(role === 'business_partner'
+      ? [{ to: '/partner', label: 'My Business', icon: Building2 }]
+      : [
+          { to: '/learn', label: 'Program', icon: BookOpen },
+          { to: '/learn/capstone', label: 'Capstone', icon: Rocket },
+          { to: '/learn/classes', label: 'Classes', icon: Video },
+          { to: '/learn/replays', label: 'Replays', icon: Clapperboard },
+        ]),
     ...(role === 'admin' || role === 'instructor'
       ? [
+          { to: '/teach/capstones', label: 'Capstones', icon: Award },
           { to: '/teach/classes', label: 'Manage Classes', icon: CalendarDays },
           { to: '/teach/review', label: 'Review', icon: ClipboardCheck },
           { to: '/admin/applications', label: 'Applications', icon: Inbox },
@@ -54,6 +63,7 @@ export function Sidebar() {
       : []),
     ...(role === 'admin'
       ? [
+          { to: '/admin/businesses', label: 'Businesses', icon: Building2 },
           { to: '/admin/cohorts', label: 'Cohorts', icon: CalendarDays },
           { to: '/admin/rooms', label: 'Rooms', icon: School },
         ]

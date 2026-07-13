@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
+import { Link } from 'react-router-dom'
 import { CheckCircle2, MessageCircle, PhoneMissed, Map } from 'lucide-react'
 import { Button } from '../../components/ui/Button'
 import { Card } from '../../components/ui/Card'
@@ -103,6 +104,11 @@ export function BusinessesPage() {
         <PageHeader
           title="Get a Free Automation for Your Business"
           description="A supervised student builds you a WhatsApp bot, workflow automation, or voice agent — at no cost. You agree to a short discovery chat, give feedback along the way, and (with your approval) let the finished project appear on our public Outcomes Board."
+          action={
+            <Link to="/businesses/register">
+              <Button>Register your business</Button>
+            </Link>
+          }
         />
 
         {/* Examples grid */}

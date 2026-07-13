@@ -22,6 +22,7 @@ export type InterestSignup = {
   whatsapp: string | null
   business_type: string | null
   pain_point: string | null
+  converted: boolean
   created_at: string
 }
 
@@ -238,9 +239,101 @@ export type ClassAttendance = {
   joined_at: string
 }
 
+export type BusinessStatus = 'pending' | 'approved' | 'archived'
+export type CapstoneType = 'whatsapp_bot' | 'automation' | 'voice_agent'
+export type CapstoneStatus =
+  | 'requested'
+  | 'matched'
+  | 'submitted'
+  | 'changes_requested'
+  | 'verified'
+  | 'declined'
+  | 'withdrawn'
+
+export type BusinessPartner = {
+  id: string
+  status: BusinessStatus
+  name: string
+  business_type: string
+  community: string
+  island: string
+  pain_point: string
+  notes: string | null
+  capacity: number
+  consent: boolean
+  proposed_by: string | null
+  owner_user_id: string | null
+  archive_reason: string | null
+  created_at: string
+  updated_at: string
+}
+
+export type BusinessContact = {
+  business_id: string
+  contact_name: string
+  email: string
+  whatsapp: string
+}
+
+export type CapstoneProject = {
+  id: string
+  user_id: string
+  business_id: string
+  cohort_id: string | null
+  type: CapstoneType
+  status: CapstoneStatus
+  pitch: string
+  video_url: string | null
+  live_proof: string | null
+  narrative: string | null
+  file_paths: string[]
+  submitted_at: string | null
+  matched_by: string | null
+  matched_at: string | null
+  verified_by: string | null
+  verified_at: string | null
+  decline_reason: string | null
+  created_at: string
+  updated_at: string
+}
+
+export type CapstoneReview = {
+  id: string
+  project_id: string
+  reviewer_id: string
+  decision: CapstoneStatus
+  feedback: string
+  created_at: string
+}
+
 export type Database = {
   public: {
     Tables: {
+      business_partners: {
+        Row: BusinessPartner
+        Insert: Pick<BusinessPartner, 'name' | 'business_type' | 'community' | 'island' | 'pain_point' | 'consent'> &
+          Partial<BusinessPartner>
+        Update: Partial<BusinessPartner>
+        Relationships: []
+      }
+      business_contacts: {
+        Row: BusinessContact
+        Insert: BusinessContact
+        Update: Partial<BusinessContact>
+        Relationships: []
+      }
+      capstone_projects: {
+        Row: CapstoneProject
+        Insert: never
+        Update: never
+        Relationships: []
+      }
+      capstone_reviews: {
+        Row: CapstoneReview
+        Insert: never
+        Update: never
+        Relationships: []
+      }
       live_classes: {
         Row: LiveClass
         Insert: Pick<LiveClass, 'room_id' | 'host_id' | 'title' | 'scheduled_at'> & Partial<LiveClass>
@@ -354,6 +447,7 @@ export type Database = {
           whatsapp?: string | null
           business_type?: string | null
           pain_point?: string | null
+          converted?: boolean
         }
         Relationships: []
       }
@@ -423,6 +517,44 @@ export type Database = {
       record_attendance: {
         Args: { p_class_id: string }
         Returns: undefined
+      }
+      is_capstone_eligible: {
+        Args: Record<string, never>
+        Returns: boolean
+      }
+      request_capstone_match: {
+        Args: { p_business_id: string; p_type: CapstoneType; p_pitch: string }
+        Returns: string
+      }
+      decide_capstone_match: {
+        Args: { p_project_id: string; p_approve: boolean; p_feedback: string }
+        Returns: undefined
+      }
+      assign_capstone: {
+        Args: { p_user_id: string; p_business_id: string; p_type: CapstoneType; p_pitch: string }
+        Returns: string
+      }
+      submit_capstone_evidence: {
+        Args: {
+          p_project_id: string
+          p_video_url: string
+          p_live_proof: string
+          p_narrative: string
+          p_file_paths: string[]
+        }
+        Returns: undefined
+      }
+      review_capstone: {
+        Args: { p_project_id: string; p_verify: boolean; p_feedback: string }
+        Returns: undefined
+      }
+      withdraw_capstone: {
+        Args: { p_project_id: string }
+        Returns: undefined
+      }
+      get_business_contact: {
+        Args: { p_project_id: string }
+        Returns: { contact_name: string; email: string; whatsapp: string }[]
       }
       is_module_unlocked: {
         Args: { p_module_id: string }

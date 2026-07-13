@@ -205,3 +205,51 @@ from public.rooms r
 join public.live_classes lc on lc.title='Kickoff: Welcome to the Institute'
 where r.slug='ai-automation'
   and not exists (select 1 from public.recordings rec where rec.title='Kickoff: Welcome to the Institute — recording');
+
+-- ============================================
+-- PRD 06 seed: businesses, contacts, capstone
+-- ============================================
+
+-- Flag the Week 7 module as the capstone gate
+update public.modules set is_capstone = true
+where sort_order = 7
+  and course_id in (select c.id from public.courses c join public.rooms r on r.id=c.room_id where r.slug='ai-automation');
+
+-- Approved businesses (capacities 1, 1, 2)
+insert into public.business_partners (status, name, business_type, community, island, pain_point, capacity, consent)
+values
+  ('approved', 'Sunset View Guesthouse', 'Tourism/Guesthouse', 'Bequia', 'Bequia',
+   'We lose bookings because nobody answers WhatsApp after 6pm, and guests give up and book elsewhere.', 1, true),
+  ('approved', 'Kingstown Auto Parts', 'Retail', 'Kingstown', 'St. Vincent',
+   'Customers call to check stock all day and we cannot keep up; we miss sales and waste hours on the phone.', 1, true),
+  ('approved', 'Grenadines Tours Co', 'Tours & Transport', 'Union Island', 'Union Island',
+   'Inquiries come from five channels and we lose track; some never get a reply and become lost bookings.', 2, true),
+  ('pending', 'Fresh Roots Farm', 'Agriculture', 'Georgetown', 'St. Vincent',
+   'We take vegetable orders on paper and lose them; customers do not know what is in stock each week.', 1, true)
+on conflict do nothing;
+
+insert into public.business_contacts (business_id, contact_name, email, whatsapp)
+select b.id, v.contact_name, v.email, v.whatsapp
+from public.business_partners b
+join (values
+  ('Sunset View Guesthouse', 'Marcia Providence', 'sunset-owner@test-biz.local', '+17845550111'),
+  ('Kingstown Auto Parts', 'Rohan Da Silva', 'autoparts-owner@test-biz.local', '+17845550122'),
+  ('Grenadines Tours Co', 'Elsa Charles', 'tours-owner@test-biz.local', '+17845550133'),
+  ('Fresh Roots Farm', 'Junior Bacchus', 'farm-owner@test-biz.local', '+17845550144')
+) as v(name, contact_name, email, whatsapp) on v.name = b.name
+where not exists (select 1 from public.business_contacts bc where bc.business_id = b.id);
+
+-- One matched + submitted capstone for the test student on the capacity-2 business
+insert into public.capstone_projects (user_id, business_id, cohort_id, type, status, pitch, video_url, live_proof, narrative, submitted_at, matched_at)
+select p.id, b.id,
+       (select cohort_id from public.enrollments e where e.user_id = p.id and e.status='active' limit 1),
+       'whatsapp_bot', 'submitted',
+       'A WhatsApp bot that answers tour inquiries instantly, quotes prices, and captures booking details into one place.',
+       'https://www.loom.com/share/example-capstone-walkthrough',
+       '+17845550133',
+       'I built a WhatsApp bot for Grenadines Tours that greets every inquiry within seconds, answers the five most common questions, quotes the standard tours, and collects the customer name, date, and party size into a single sheet the owner checks each morning. In the first test week it handled 14 inquiries with zero missed messages.',
+       now() - interval '1 day', now() - interval '5 days'
+from public.profiles p, public.business_partners b
+where p.email='student@test.local' and b.name='Grenadines Tours Co'
+  and exists (select 1 from public.enrollments e where e.user_id = p.id and e.status='active')
+  and not exists (select 1 from public.capstone_projects cp where cp.user_id = p.id);

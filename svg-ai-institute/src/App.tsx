@@ -21,6 +21,11 @@ import { ClassSchedulePage } from './features/live/ClassSchedulePage'
 import { ClassesAdminPage } from './features/live/ClassesAdminPage'
 import { LiveClassPage } from './features/live/LiveClassPage'
 import { ReplayPlayerPage, ReplaysPage } from './features/live/ReplaysPage'
+import { BusinessRegisterPage } from './features/capstone/BusinessRegisterPage'
+import { BusinessesAdminPage } from './features/capstone/BusinessesAdminPage'
+import { CapstoneHubPage } from './features/capstone/CapstoneHubPage'
+import { CapstonesReviewPage } from './features/capstone/CapstonesReviewPage'
+import { PartnerPortalPage } from './features/capstone/PartnerPortalPage'
 import { AboutPage } from './features/public/AboutPage'
 import { ApplyPage } from './features/public/ApplyPage'
 import { ApplyStatusPage } from './features/public/ApplyStatusPage'
@@ -58,6 +63,7 @@ export default function App() {
             <Route path="/faq" element={<FaqPage />} />
             <Route path="/apply" element={<ApplyPage />} />
             <Route path="/apply/status" element={<ApplyStatusPage />} />
+            <Route path="/businesses/register" element={<BusinessRegisterPage />} />
             <Route path="/signin" element={<SignInPage />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
             <Route path="*" element={<NotFoundPage />} />
@@ -76,6 +82,31 @@ export default function App() {
             <Route path="/learn/classes/:id" element={<LiveClassPage />} />
             <Route path="/learn/replays" element={<ReplaysPage />} />
             <Route path="/learn/replays/:id" element={<ReplayPlayerPage />} />
+            <Route path="/learn/capstone" element={<CapstoneHubPage />} />
+            <Route
+              path="/partner"
+              element={
+                <ProtectedRoute allowedRoles={['business_partner']}>
+                  <PartnerPortalPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/teach/capstones"
+              element={
+                <ProtectedRoute allowedRoles={['admin', 'instructor']}>
+                  <CapstonesReviewPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/businesses"
+              element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <BusinessesAdminPage />
+                </ProtectedRoute>
+              }
+            />
             <Route
               path="/teach/classes"
               element={
