@@ -17,6 +17,10 @@ import { LessonPlayerPage } from './features/learning/LessonPlayerPage'
 import { ReviewQueuePage } from './features/learning/ReviewQueuePage'
 import { RoomDetailPage } from './features/learning/RoomDetailPage'
 import { RoomsPage } from './features/learning/RoomsPage'
+import { ClassSchedulePage } from './features/live/ClassSchedulePage'
+import { ClassesAdminPage } from './features/live/ClassesAdminPage'
+import { LiveClassPage } from './features/live/LiveClassPage'
+import { ReplayPlayerPage, ReplaysPage } from './features/live/ReplaysPage'
 import { AboutPage } from './features/public/AboutPage'
 import { ApplyPage } from './features/public/ApplyPage'
 import { ApplyStatusPage } from './features/public/ApplyStatusPage'
@@ -68,6 +72,18 @@ export default function App() {
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/learn" element={<LearnPage />} />
             <Route path="/learn/lesson/:lessonId" element={<LessonPlayerPage />} />
+            <Route path="/learn/classes" element={<ClassSchedulePage />} />
+            <Route path="/learn/classes/:id" element={<LiveClassPage />} />
+            <Route path="/learn/replays" element={<ReplaysPage />} />
+            <Route path="/learn/replays/:id" element={<ReplayPlayerPage />} />
+            <Route
+              path="/teach/classes"
+              element={
+                <ProtectedRoute allowedRoles={['admin', 'instructor']}>
+                  <ClassesAdminPage />
+                </ProtectedRoute>
+              }
+            />
             <Route
               path="/teach/review"
               element={

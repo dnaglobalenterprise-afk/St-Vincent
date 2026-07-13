@@ -161,3 +161,47 @@ join public.modules mo on mo.id = l.module_id and mo.sort_order = 1
 join public.profiles p on p.email = 'student@test.local'
 where l.type = 'assignment'
   and not exists (select 1 from public.submissions s where s.lesson_id = l.id and s.user_id = p.id);
+
+-- ============================================
+-- PRD 05 seed: live classes + one recording
+-- ============================================
+
+-- Upcoming external-mode class (3 days out)
+insert into public.live_classes (room_id, host_id, title, description, scheduled_at, duration_minutes, mode, meeting_url, status)
+select r.id, p.id,
+       'Week 1 Live: AI Fundamentals Q&A',
+       'Bring your questions from the Week 1 lessons. We build a prompt live together.',
+       now() + interval '3 days', 90, 'external', 'https://meet.google.com/svg-ai-demo', 'scheduled'
+from public.rooms r, public.profiles p
+where r.slug='ai-automation' and p.email='instructor@test.local'
+  and not exists (select 1 from public.live_classes lc where lc.title='Week 1 Live: AI Fundamentals Q&A');
+
+-- Upcoming embedded-mode class (7 days out) — stream provisioned later via edge fn
+insert into public.live_classes (room_id, host_id, title, description, scheduled_at, duration_minutes, mode, status)
+select r.id, p.id,
+       'Week 2 Live: Prompt Craft Workshop',
+       'A hands-on workshop, streamed live. Watch right here on the class page.',
+       now() + interval '7 days', 90, 'embedded', 'scheduled'
+from public.rooms r, public.profiles p
+where r.slug='ai-automation' and p.email='instructor@test.local'
+  and not exists (select 1 from public.live_classes lc where lc.title='Week 2 Live: Prompt Craft Workshop');
+
+-- Past class (2 days ago) with a ready recording
+insert into public.live_classes (room_id, host_id, title, description, scheduled_at, duration_minutes, mode, meeting_url, status)
+select r.id, p.id,
+       'Kickoff: Welcome to the Institute',
+       'Our opening session — the mission, the pipeline, and what you will build.',
+       now() - interval '2 days', 60, 'external', 'https://meet.google.com/svg-ai-kickoff', 'ended'
+from public.rooms r, public.profiles p
+where r.slug='ai-automation' and p.email='instructor@test.local'
+  and not exists (select 1 from public.live_classes lc where lc.title='Kickoff: Welcome to the Institute');
+
+insert into public.recordings (room_id, class_id, title, description, mux_playback_id, mux_asset_id, duration_seconds, status, published)
+select r.id, lc.id,
+       'Kickoff: Welcome to the Institute — recording',
+       'Replay of our opening session.',
+       'p92lGkSNut11cwrViag00Rs6tiaUZvknPYvLXN1hb92E', 'seed-kickoff-asset', 60, 'ready', true
+from public.rooms r
+join public.live_classes lc on lc.title='Kickoff: Welcome to the Institute'
+where r.slug='ai-automation'
+  and not exists (select 1 from public.recordings rec where rec.title='Kickoff: Welcome to the Institute — recording');

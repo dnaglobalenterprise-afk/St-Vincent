@@ -1,5 +1,15 @@
 import { NavLink, useNavigate } from 'react-router-dom'
-import { BookOpen, CalendarDays, ClipboardCheck, Inbox, LayoutDashboard, LogOut, School } from 'lucide-react'
+import {
+  BookOpen,
+  CalendarDays,
+  ClipboardCheck,
+  Clapperboard,
+  Inbox,
+  LayoutDashboard,
+  LogOut,
+  School,
+  Video,
+} from 'lucide-react'
 import { Badge } from '../ui/Badge'
 import type { Role } from '../../lib/types'
 import { useAuth } from '../../features/auth/useAuth'
@@ -33,8 +43,11 @@ export function Sidebar() {
 
   const staffLinks = [
     { to: '/learn', label: 'Program', icon: BookOpen },
+    { to: '/learn/classes', label: 'Classes', icon: Video },
+    { to: '/learn/replays', label: 'Replays', icon: Clapperboard },
     ...(role === 'admin' || role === 'instructor'
       ? [
+          { to: '/teach/classes', label: 'Manage Classes', icon: CalendarDays },
           { to: '/teach/review', label: 'Review', icon: ClipboardCheck },
           { to: '/admin/applications', label: 'Applications', icon: Inbox },
         ]

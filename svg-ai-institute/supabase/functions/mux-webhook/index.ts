@@ -50,20 +50,74 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
     )
 
-    if (event.type === 'video.asset.ready') {
+    if (event.type === 'video.live_stream.active') {
+      const streamId: string | undefined = event.data?.id
+      if (streamId) {
+        await admin.from('live_classes').update({ status: 'live' }).eq('mux_live_stream_id', streamId)
+      }
+    } else if (event.type === 'video.live_stream.idle') {
+      const streamId: string | undefined = event.data?.id
+      if (streamId) {
+        await admin.from('live_classes').update({ status: 'ended' }).eq('mux_live_stream_id', streamId)
+      }
+    } else if (event.type === 'video.asset.ready') {
       const uploadId: string | undefined = event.data?.upload_id
+      const liveStreamId: string | undefined = event.data?.live_stream_id
+      const assetId: string | undefined = event.data?.id
       const playbackId: string | undefined = event.data?.playback_ids?.[0]?.id
       const duration: number | null = event.data?.duration ? Math.round(event.data.duration) : null
-      if (uploadId && playbackId) {
-        await admin
-          .from('lessons')
-          .update({ mux_playback_id: playbackId, video_status: 'ready', duration_seconds: duration })
+
+      if (liveStreamId && playbackId) {
+        // Recording of a live stream: create a ready recordings row for its class.
+        const { data: cls } = await admin
+          .from('live_classes')
+          .select('id, room_id, title, description')
+          .eq('mux_live_stream_id', liveStreamId)
+          .maybeSingle()
+        if (cls) {
+          const { data: existing } = await admin
+            .from('recordings')
+            .select('id')
+            .eq('mux_asset_id', assetId)
+            .maybeSingle()
+          if (!existing) {
+            await admin.from('recordings').insert({
+              room_id: cls.room_id,
+              class_id: cls.id,
+              title: `${cls.title} — recording`,
+              description: cls.description,
+              mux_asset_id: assetId,
+              mux_playback_id: playbackId,
+              duration_seconds: duration,
+              status: 'ready',
+            })
+          }
+        }
+      } else if (uploadId && playbackId) {
+        // External-mode recording upload flips to ready...
+        const { data: rec } = await admin
+          .from('recordings')
+          .select('id')
           .eq('mux_upload_id', uploadId)
+          .maybeSingle()
+        if (rec) {
+          await admin
+            .from('recordings')
+            .update({ mux_playback_id: playbackId, mux_asset_id: assetId, status: 'ready', duration_seconds: duration })
+            .eq('mux_upload_id', uploadId)
+        } else {
+          // ...otherwise fall through to the existing lesson-video handling.
+          await admin
+            .from('lessons')
+            .update({ mux_playback_id: playbackId, video_status: 'ready', duration_seconds: duration })
+            .eq('mux_upload_id', uploadId)
+        }
       }
     } else if (event.type === 'video.asset.errored' || event.type === 'video.upload.errored') {
       const uploadId: string | undefined = event.data?.upload_id ?? event.data?.id
       if (uploadId) {
         await admin.from('lessons').update({ video_status: 'errored' }).eq('mux_upload_id', uploadId)
+        await admin.from('recordings').update({ status: 'errored' }).eq('mux_upload_id', uploadId)
       }
     }
 

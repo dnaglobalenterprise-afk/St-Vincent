@@ -151,11 +151,12 @@ export function LessonPlayerPage() {
         <h1 className="mt-2 font-heading text-3xl font-bold text-ink">{content.title}</h1>
 
         <div className="mt-6">
-          {content.type === 'video' && (
+          {(content.type === 'video' || content.type === 'replay') && (
             <VideoLesson
               content={content}
               isComplete={isComplete}
               marking={marking}
+              allowComplete={content.type === 'video'}
               onMarkComplete={() => void markComplete()}
             />
           )}
@@ -260,11 +261,13 @@ function VideoLesson({
   content,
   isComplete,
   marking,
+  allowComplete = true,
   onMarkComplete,
 }: {
   content: LessonContent
   isComplete: boolean
   marking: boolean
+  allowComplete?: boolean
   onMarkComplete: () => void
 }) {
   return (
@@ -290,9 +293,11 @@ function VideoLesson({
         </div>
       )}
       {content.body_markdown && <Markdown source={content.body_markdown} />}
-      <div>
-        <MarkCompleteButton isComplete={isComplete} marking={marking} onMarkComplete={onMarkComplete} />
-      </div>
+      {allowComplete && (
+        <div>
+          <MarkCompleteButton isComplete={isComplete} marking={marking} onMarkComplete={onMarkComplete} />
+        </div>
+      )}
     </div>
   )
 }

@@ -21,8 +21,10 @@ Deno.serve(async (req) => {
   if (req.method !== 'POST') return json({ error: 'POST only' }, 405)
 
   try {
-    const { lesson_id } = await req.json()
-    if (!lesson_id) return json({ error: 'lesson_id is required' }, 400)
+    const { lesson_id, recording_id } = await req.json()
+    if (!lesson_id && !recording_id) {
+      return json({ error: 'lesson_id or recording_id is required' }, 400)
+    }
 
     const tokenId = Deno.env.get('MUX_TOKEN_ID')
     const tokenSecret = Deno.env.get('MUX_TOKEN_SECRET')
@@ -46,12 +48,13 @@ Deno.serve(async (req) => {
       .single()
     if (caller?.role !== 'admin') return json({ error: 'Admins only' }, 403)
 
-    const { data: lesson } = await admin
-      .from('lessons')
-      .select('id, type')
-      .eq('id', lesson_id)
-      .single()
-    if (!lesson || lesson.type !== 'video') return json({ error: 'Video lesson not found' }, 404)
+    if (lesson_id) {
+      const { data: lesson } = await admin.from('lessons').select('id, type').eq('id', lesson_id).single()
+      if (!lesson || lesson.type !== 'video') return json({ error: 'Video lesson not found' }, 404)
+    } else {
+      const { data: rec } = await admin.from('recordings').select('id').eq('id', recording_id).single()
+      if (!rec) return json({ error: 'Recording not found' }, 404)
+    }
 
     const muxRes = await fetch('https://api.mux.com/video/v1/uploads', {
       method: 'POST',
@@ -61,7 +64,7 @@ Deno.serve(async (req) => {
       },
       body: JSON.stringify({
         cors_origin: Deno.env.get('SITE_URL') ?? '*',
-        new_asset_settings: { playback_policy: ['public'], passthrough: lesson_id },
+        new_asset_settings: { playback_policy: ['public'], passthrough: lesson_id ?? recording_id },
       }),
     })
     if (!muxRes.ok) {
@@ -69,11 +72,19 @@ Deno.serve(async (req) => {
     }
     const upload = (await muxRes.json()).data
 
-    const { error: updErr } = await admin
-      .from('lessons')
-      .update({ mux_upload_id: upload.id, video_status: 'processing', mux_playback_id: null })
-      .eq('id', lesson_id)
-    if (updErr) return json({ error: `Lesson update failed: ${updErr.message}` }, 500)
+    if (lesson_id) {
+      const { error: updErr } = await admin
+        .from('lessons')
+        .update({ mux_upload_id: upload.id, video_status: 'processing', mux_playback_id: null })
+        .eq('id', lesson_id)
+      if (updErr) return json({ error: `Lesson update failed: ${updErr.message}` }, 500)
+    } else {
+      const { error: updErr } = await admin
+        .from('recordings')
+        .update({ mux_upload_id: upload.id, status: 'processing' })
+        .eq('id', recording_id)
+      if (updErr) return json({ error: `Recording update failed: ${updErr.message}` }, 500)
+    }
 
     return json({ upload_url: upload.url, upload_id: upload.id })
   } catch (e) {

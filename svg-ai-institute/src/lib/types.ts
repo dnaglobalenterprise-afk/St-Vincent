@@ -191,9 +191,74 @@ export type Submission = {
   created_at: string
 }
 
+export type LiveClassStatus = 'scheduled' | 'live' | 'ended' | 'cancelled'
+export type LiveClassMode = 'external' | 'embedded'
+export type RecordingStatus = 'processing' | 'ready' | 'errored'
+
+export type LiveClass = {
+  id: string
+  room_id: string
+  cohort_id: string | null
+  host_id: string
+  title: string
+  description: string | null
+  scheduled_at: string
+  duration_minutes: number
+  mode: LiveClassMode
+  meeting_url: string | null
+  mux_live_stream_id: string | null
+  mux_live_playback_id: string | null
+  status: LiveClassStatus
+  cancel_reason: string | null
+  created_at: string
+  updated_at: string
+}
+
+export type Recording = {
+  id: string
+  room_id: string
+  class_id: string | null
+  title: string
+  description: string | null
+  mux_upload_id: string | null
+  mux_asset_id: string | null
+  mux_playback_id: string | null
+  duration_seconds: number | null
+  status: RecordingStatus
+  published: boolean
+  attached_lesson_ids: string[]
+  created_at: string
+  updated_at: string
+}
+
+export type ClassAttendance = {
+  id: string
+  class_id: string
+  user_id: string
+  joined_at: string
+}
+
 export type Database = {
   public: {
     Tables: {
+      live_classes: {
+        Row: LiveClass
+        Insert: Pick<LiveClass, 'room_id' | 'host_id' | 'title' | 'scheduled_at'> & Partial<LiveClass>
+        Update: Partial<LiveClass>
+        Relationships: []
+      }
+      recordings: {
+        Row: Recording
+        Insert: Pick<Recording, 'room_id' | 'title'> & Partial<Recording>
+        Update: Partial<Recording>
+        Relationships: []
+      }
+      class_attendance: {
+        Row: ClassAttendance
+        Insert: never
+        Update: never
+        Relationships: []
+      }
       applications: {
         Row: Application
         Insert: Partial<Application> &
@@ -349,6 +414,14 @@ export type Database = {
       }
       review_submission: {
         Args: { p_submission_id: string; p_decision: SubmissionStatus; p_feedback: string }
+        Returns: undefined
+      }
+      get_stream_credentials: {
+        Args: { p_class_id: string }
+        Returns: { rtmp_url: string; stream_key: string }[]
+      }
+      record_attendance: {
+        Args: { p_class_id: string }
         Returns: undefined
       }
       is_module_unlocked: {
