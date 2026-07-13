@@ -314,3 +314,68 @@ select p.id, c.id, 'SVGAI-DEMO1', (select id from public.profiles where email='a
 from public.profiles p, public.cohorts c
 where p.email='student@test.local' and c.name='Cohort 1 — 2026'
 on conflict do nothing;
+
+-- ============================================
+-- PRD 08 seed: channels, messages, thread, mention, DM
+-- ============================================
+
+insert into public.channels (room_id, name, description)
+select r.id, v.name, v.description
+from public.rooms r,
+(values
+  ('general', 'Introduce yourself and talk shop'),
+  ('help', 'Stuck? Ask here — screenshots welcome'),
+  ('wins', 'Ship something? Post it. We celebrate here')
+) as v(name, description)
+where r.slug = 'ai-automation'
+  and not exists (select 1 from public.channels c where c.room_id = r.id and c.name = v.name);
+
+-- A dozen messages across #general and #help (authors: student, instructor, admin)
+do $$
+declare
+  gen uuid; hlp uuid; stu uuid; ins uuid; adm uuid; parent uuid;
+begin
+  select id into gen from public.channels where name='general';
+  select id into hlp from public.channels where name='help';
+  select id into stu from public.profiles where email='student@test.local';
+  select id into ins from public.profiles where email='instructor@test.local';
+  select id into adm from public.profiles where email='admin@test.local';
+  if exists (select 1 from public.messages where channel_id=gen) then return; end if;
+
+  insert into public.messages (channel_id, author_id, body, created_at) values
+    (gen, ins, 'Welcome to the School of AI Automation 🎉 Introduce yourself here — where you''re from and what you want to build.', now() - interval '3 days'),
+    (gen, stu, 'Hi all! Stu from Kingstown. I want to build WhatsApp bots for the guesthouses around here.', now() - interval '3 days' + interval '10 min'),
+    (gen, adm, 'Great to have you Stu. This community is small on purpose — say hi, ask questions, share wins.', now() - interval '3 days' + interval '20 min'),
+    (gen, stu, 'Question — is Make or n8n better for a first automation?', now() - interval '2 days'),
+    (gen, ins, 'Start with Make for the fast wins, then n8n when you need more control. Both in the course.', now() - interval '2 days' + interval '5 min');
+
+  insert into public.messages (channel_id, author_id, body, created_at)
+    values (hlp, stu, 'My Make scenario keeps erroring on the WhatsApp module. Anyone seen "invalid token"?', now() - interval '1 day')
+    returning id into parent;
+  insert into public.messages (channel_id, parent_id, author_id, body, created_at) values
+    (hlp, parent, ins, 'That usually means the access token expired. Regenerate it and paste the new one into the connection.', now() - interval '1 day' + interval '15 min'),
+    (hlp, parent, stu, 'That was it — working now. Thank you! 🙏', now() - interval '1 day' + interval '30 min');
+
+  -- a message mentioning the instructor
+  insert into public.messages (channel_id, author_id, body, created_at)
+    values (hlp, stu, 'Thanks for the help earlier, that fixed it completely.', now() - interval '20 hours')
+    returning id into parent;
+  insert into public.message_mentions (message_id, mentioned_id) values (parent, ins);
+end $$;
+
+-- One DM conversation between the test student and instructor
+do $$
+declare stu uuid; ins uuid; conv uuid; lo uuid; hi uuid;
+begin
+  select id into stu from public.profiles where email='student@test.local';
+  select id into ins from public.profiles where email='instructor@test.local';
+  lo := least(stu, ins); hi := greatest(stu, ins);
+  insert into public.dm_conversations (user_low, user_high) values (lo, hi)
+    on conflict do nothing;
+  select id into conv from public.dm_conversations where user_low=lo and user_high=hi;
+  if not exists (select 1 from public.dm_messages where conversation_id=conv) then
+    insert into public.dm_messages (conversation_id, author_id, body, created_at) values
+      (conv, ins, 'Hi Stu — saw your capstone idea, it''s strong. Want to talk through the booking flow?', now() - interval '2 days'),
+      (conv, stu, 'Yes please! That would help a lot. When are you free?', now() - interval '2 days' + interval '1 hour');
+  end if;
+end $$;

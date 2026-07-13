@@ -338,9 +338,86 @@ export type Certificate = {
   issued_by: string
 }
 
+export type Channel = {
+  id: string
+  room_id: string
+  name: string
+  description: string | null
+  archived: boolean
+  created_at: string
+}
+
+export type Message = {
+  id: string
+  channel_id: string
+  parent_id: string | null
+  author_id: string
+  body: string
+  edited_at: string | null
+  deleted_at: string | null
+  deleted_by: string | null
+  created_at: string
+}
+
+export type DmConversation = {
+  id: string
+  user_low: string
+  user_high: string
+  created_at: string
+}
+
+export type DmMessage = {
+  id: string
+  conversation_id: string
+  author_id: string
+  body: string
+  edited_at: string | null
+  deleted_at: string | null
+  created_at: string
+}
+
+export type UserMute = {
+  id: string
+  user_id: string
+  room_id: string
+  muted_by: string
+  reason: string
+  until_at: string
+  lifted_at: string | null
+  created_at: string
+}
+
 export type Database = {
   public: {
     Tables: {
+      channels: {
+        Row: Channel
+        Insert: Pick<Channel, 'room_id' | 'name'> & Partial<Channel>
+        Update: Partial<Channel>
+        Relationships: []
+      }
+      messages: { Row: Message; Insert: never; Update: never; Relationships: [] }
+      dm_messages: { Row: DmMessage; Insert: never; Update: never; Relationships: [] }
+      dm_conversations: { Row: DmConversation; Insert: never; Update: never; Relationships: [] }
+      user_mutes: { Row: UserMute; Insert: never; Update: never; Relationships: [] }
+      channel_reads: {
+        Row: { user_id: string; channel_id: string; last_read_at: string }
+        Insert: { user_id: string; channel_id: string; last_read_at?: string }
+        Update: { last_read_at?: string }
+        Relationships: []
+      }
+      dm_reads: {
+        Row: { user_id: string; conversation_id: string; last_read_at: string }
+        Insert: { user_id: string; conversation_id: string; last_read_at?: string }
+        Update: { last_read_at?: string }
+        Relationships: []
+      }
+      message_mentions: {
+        Row: { message_id: string; mentioned_id: string; created_at: string }
+        Insert: never
+        Update: never
+        Relationships: []
+      }
       showcase_entries: {
         Row: ShowcaseEntry
         Insert: never
@@ -631,6 +708,24 @@ export type Database = {
       get_outcome_stats: {
         Args: Record<string, never>
         Returns: { graduates: number; deployed: number; businesses: number }[]
+      }
+      post_message: {
+        Args: { p_channel_id: string; p_parent_id: string | null; p_body: string; p_mentions: string[] }
+        Returns: string
+      }
+      edit_message: { Args: { p_message_id: string; p_body: string }; Returns: undefined }
+      delete_message: { Args: { p_message_id: string }; Returns: undefined }
+      start_dm: { Args: { p_other: string }; Returns: string }
+      post_dm: { Args: { p_conversation_id: string; p_body: string }; Returns: string }
+      mute_user: {
+        Args: { p_user_id: string; p_room_id: string; p_hours: number; p_reason: string }
+        Returns: undefined
+      }
+      unmute_user: { Args: { p_mute_id: string }; Returns: undefined }
+      is_muted: { Args: { p_user_id: string; p_room_id: string }; Returns: boolean }
+      get_room_members: {
+        Args: { p_room_id: string }
+        Returns: { id: string; name: string; role: Role; cohort: string | null }[]
       }
       is_module_unlocked: {
         Args: { p_module_id: string }

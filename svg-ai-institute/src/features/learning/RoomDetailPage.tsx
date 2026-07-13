@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { BookOpen, CalendarDays, Plus } from 'lucide-react'
+import { BookOpen, CalendarDays, Hash, Plus } from 'lucide-react'
 import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
 import { Card } from '../../components/ui/Card'
@@ -189,6 +189,9 @@ export function RoomDetailPage() {
         )}
       </section>
 
+      {/* Channels */}
+      <ChannelsSection roomId={room.id} />
+
       <Modal title="New course" open={courseModal} onClose={() => setCourseModal(false)}>
         <div className="flex flex-col gap-4">
           <Input
@@ -203,5 +206,87 @@ export function RoomDetailPage() {
         </div>
       </Modal>
     </div>
+  )
+}
+
+function ChannelsSection({ roomId }: { roomId: string }) {
+  const [channels, setChannels] = useState<{ id: string; name: string; description: string | null; archived: boolean }[]>([])
+  const [modalOpen, setModalOpen] = useState(false)
+  const [name, setName] = useState('')
+  const [description, setDescription] = useState('')
+  const [error, setError] = useState<string | null>(null)
+  const [saving, setSaving] = useState(false)
+
+  const load = useCallback(async () => {
+    const { data } = await supabase.from('channels').select('id, name, description, archived').eq('room_id', roomId).order('created_at')
+    setChannels(data ?? [])
+  }, [roomId])
+
+  useEffect(() => { void load() }, [load])
+
+  const create = async () => {
+    const clean = name.trim().toLowerCase()
+    if (!/^[a-z0-9-]{2,32}$/.test(clean)) { setError('Name must be lowercase letters, numbers, hyphens (2-32).'); return }
+    setSaving(true)
+    const { error: err } = await supabase.from('channels').insert({ room_id: roomId, name: clean, description: description.trim() || null })
+    setSaving(false)
+    if (err) { setError(err.code === '23505' ? 'A channel with that name exists.' : 'Could not create.'); return }
+    setModalOpen(false); setName(''); setDescription(''); setError(null)
+    void load()
+  }
+
+  const rename = async (id: string, current: string) => {
+    const next = prompt('Rename channel to (lowercase, hyphens):', current)
+    if (!next) return
+    const clean = next.trim().toLowerCase()
+    if (!/^[a-z0-9-]{2,32}$/.test(clean)) return
+    await supabase.from('channels').update({ name: clean }).eq('id', id)
+    void load()
+  }
+
+  const toggleArchive = async (id: string, archived: boolean) => {
+    await supabase.from('channels').update({ archived: !archived }).eq('id', id)
+    void load()
+  }
+
+  return (
+    <section aria-label="Channels" className="flex flex-col gap-4">
+      <div className="flex items-center justify-between">
+        <h2 className="font-heading text-2xl font-semibold text-ink">Community channels</h2>
+        <Button size="sm" onClick={() => setModalOpen(true)}><Plus className="h-4 w-4" aria-hidden="true" /> New Channel</Button>
+      </div>
+      {channels.length === 0 ? (
+        <Card><EmptyState icon={Hash} message="No channels yet." /></Card>
+      ) : (
+        <div className="flex flex-col gap-2">
+          {channels.map((c) => (
+            <Card key={c.id}>
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <Hash className="h-4 w-4 text-ink-muted" aria-hidden="true" />
+                  <div>
+                    <p className="font-heading text-base font-semibold text-ink">{c.name}{c.archived ? ' (archived)' : ''}</p>
+                    {c.description && <p className="text-sm text-ink-muted">{c.description}</p>}
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <Button size="sm" variant="ghost" onClick={() => void rename(c.id, c.name)}>Rename</Button>
+                  <Button size="sm" variant="ghost" onClick={() => void toggleArchive(c.id, c.archived)}>{c.archived ? 'Unarchive' : 'Archive'}</Button>
+                </div>
+              </div>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      <Modal title="New channel" open={modalOpen} onClose={() => setModalOpen(false)}>
+        <div className="flex flex-col gap-4">
+          <Input label="Name (lowercase, hyphens)" name="channel-name" placeholder="announcements" value={name} onChange={(e) => setName(e.target.value)} />
+          <Input label="Description" name="channel-desc" value={description} onChange={(e) => setDescription(e.target.value)} />
+          {error && <p className="text-sm text-danger">{error}</p>}
+          <Button loading={saving} onClick={() => void create()}>Create channel</Button>
+        </div>
+      </Modal>
+    </section>
   )
 }
