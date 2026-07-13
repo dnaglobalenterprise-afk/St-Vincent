@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from 'react-router-dom'
-import { LayoutDashboard, LogOut } from 'lucide-react'
+import { CalendarDays, Inbox, LayoutDashboard, LogOut } from 'lucide-react'
 import { Badge } from '../ui/Badge'
 import type { Role } from '../../lib/types'
 import { useAuth } from '../../features/auth/useAuth'
@@ -31,6 +31,13 @@ export function Sidebar() {
   const { profile, role, signOut } = useAuth()
   const navigate = useNavigate()
 
+  const staffLinks = [
+    ...(role === 'admin' || role === 'instructor'
+      ? [{ to: '/admin/applications', label: 'Applications', icon: Inbox }]
+      : []),
+    ...(role === 'admin' ? [{ to: '/admin/cohorts', label: 'Cohorts', icon: CalendarDays }] : []),
+  ]
+
   const handleSignOut = async () => {
     await signOut()
     navigate('/signin', { replace: true })
@@ -53,6 +60,12 @@ export function Sidebar() {
             <LayoutDashboard className="h-5 w-5" aria-hidden="true" />
             Dashboard
           </NavLink>
+          {staffLinks.map((link) => (
+            <NavLink key={link.to} to={link.to} className={navLinkClasses}>
+              <link.icon className="h-5 w-5" aria-hidden="true" />
+              {link.label}
+            </NavLink>
+          ))}
           <button
             type="button"
             onClick={() => void handleSignOut()}
@@ -87,6 +100,20 @@ export function Sidebar() {
           <LayoutDashboard className="h-5 w-5" aria-hidden="true" />
           Dashboard
         </NavLink>
+        {staffLinks.map((link) => (
+          <NavLink
+            key={link.to}
+            to={link.to}
+            className={({ isActive }) =>
+              `flex flex-1 flex-col items-center gap-1 py-2.5 text-sm font-medium ${
+                isActive ? 'text-svgblue-500' : 'text-ink-muted'
+              }`
+            }
+          >
+            <link.icon className="h-5 w-5" aria-hidden="true" />
+            {link.label}
+          </NavLink>
+        ))}
         <button
           type="button"
           onClick={() => void handleSignOut()}

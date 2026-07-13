@@ -9,8 +9,11 @@ import { AuthProvider } from './features/auth/useAuth'
 import { ProtectedRoute } from './features/auth/ProtectedRoute'
 import { SignInPage } from './features/auth/SignInPage'
 import { DashboardPage } from './features/dashboard/DashboardPage'
+import { ApplicationsPage } from './features/admissions/ApplicationsPage'
+import { CohortsPage } from './features/admissions/CohortsPage'
 import { AboutPage } from './features/public/AboutPage'
 import { ApplyPage } from './features/public/ApplyPage'
+import { ApplyStatusPage } from './features/public/ApplyStatusPage'
 import { BusinessesPage } from './features/public/BusinessesPage'
 import { FaqPage } from './features/public/FaqPage'
 import { HomePage } from './features/public/HomePage'
@@ -44,6 +47,7 @@ export default function App() {
             <Route path="/about" element={<AboutPage />} />
             <Route path="/faq" element={<FaqPage />} />
             <Route path="/apply" element={<ApplyPage />} />
+            <Route path="/apply/status" element={<ApplyStatusPage />} />
             <Route path="/signin" element={<SignInPage />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
             <Route path="*" element={<NotFoundPage />} />
@@ -56,6 +60,22 @@ export default function App() {
             }
           >
             <Route path="/dashboard" element={<DashboardPage />} />
+            <Route
+              path="/admin/applications"
+              element={
+                <ProtectedRoute allowedRoles={['admin', 'instructor']}>
+                  <ApplicationsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/cohorts"
+              element={
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <CohortsPage />
+                </ProtectedRoute>
+              }
+            />
           </Route>
         </Routes>
       </AuthProvider>

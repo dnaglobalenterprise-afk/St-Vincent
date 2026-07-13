@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 
-type BadgeVariant = 'blue' | 'gold' | 'green' | 'neutral'
+type BadgeVariant = 'blue' | 'gold' | 'green' | 'neutral' | 'warning'
 
 interface BadgeProps {
   variant?: BadgeVariant
@@ -13,6 +13,7 @@ const variantClasses: Record<BadgeVariant, string> = {
   gold: 'bg-svggold-500 text-ink',
   green: 'bg-svggreen-100 text-svggreen-700',
   neutral: 'bg-surface-alt text-ink-muted',
+  warning: 'bg-svggold-100 text-warning',
 }
 
 export function Badge({ variant = 'neutral', children, className = '' }: BadgeProps) {
