@@ -10,7 +10,7 @@ const FOOTER_LINKS = [
 
 export function Footer() {
   return (
-    <footer className="border-t border-line bg-svgblue-50">
+    <footer className="border-t border-line bg-svgblue-50 print:hidden">
       <div className="mx-auto grid max-w-6xl grid-cols-1 gap-10 px-4 py-12 md:grid-cols-3">
         {/* Wordmark + mission + flag bars */}
         <div className="flex flex-col gap-3">

@@ -29,7 +29,7 @@ export async function loadProgram(userId: string): Promise<ProgramData | null> {
     .from('enrollments')
     .select('cohort_id, cohorts(room_id)')
     .eq('user_id', userId)
-    .eq('status', 'active')
+    .in('status', ['active', 'graduated'])
     .limit(1)
     .maybeSingle()
 

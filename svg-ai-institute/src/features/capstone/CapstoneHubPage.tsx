@@ -20,6 +20,7 @@ import { supabase } from '../../lib/supabase'
 import type { BusinessPartner, CapstoneProject, CapstoneReview, CapstoneType } from '../../lib/types'
 import { useAuth } from '../auth/useAuth'
 import { newId } from './BusinessRegisterPage'
+import { ShowcasePrepare } from '../outcomes/ShowcasePrepare'
 import { Markdown } from '../learning/Markdown'
 import {
   MAX_FILES,
@@ -308,13 +309,16 @@ function MyCapstone({ project, reviews, onChange }: { project: CapstoneProject; 
     <div className="flex flex-col gap-6">
       {/* Verified celebration */}
       {project.status === 'verified' && (
-        <Card className="bg-svggreen-100">
-          <div className="flex flex-col items-center gap-3 py-6 text-center">
-            <PartyPopper className="h-12 w-12 text-svggold-600" aria-hidden="true" />
-            <h2 className="font-heading text-2xl font-semibold text-svggreen-700">You built something real.</h2>
-            <p className="text-base text-ink">Your showcase page is coming soon.</p>
-          </div>
-        </Card>
+        <>
+          <Card className="bg-svggreen-100">
+            <div className="flex flex-col items-center gap-3 py-6 text-center">
+              <PartyPopper className="h-12 w-12 text-svggold-600" aria-hidden="true" />
+              <h2 className="font-heading text-2xl font-semibold text-svggreen-700">You built something real.</h2>
+              <p className="text-base text-ink">Prepare your public showcase page below.</p>
+            </div>
+          </Card>
+          <ShowcasePrepare project={project} />
+        </>
       )}
 
       {/* Timeline */}

@@ -26,6 +26,12 @@ import { BusinessesAdminPage } from './features/capstone/BusinessesAdminPage'
 import { CapstoneHubPage } from './features/capstone/CapstoneHubPage'
 import { CapstonesReviewPage } from './features/capstone/CapstonesReviewPage'
 import { PartnerPortalPage } from './features/capstone/PartnerPortalPage'
+import { OutcomesBoardPage } from './features/outcomes/OutcomesBoardPage'
+import { ShowcasePage } from './features/outcomes/ShowcasePage'
+import { ShowcaseAdminPage } from './features/outcomes/ShowcaseAdminPage'
+import { CohortRosterPage } from './features/outcomes/CohortRosterPage'
+import { CertificatePage } from './features/outcomes/CertificatePage'
+import { VerifyPage } from './features/outcomes/VerifyPage'
 import { AboutPage } from './features/public/AboutPage'
 import { ApplyPage } from './features/public/ApplyPage'
 import { ApplyStatusPage } from './features/public/ApplyStatusPage'
@@ -64,6 +70,10 @@ export default function App() {
             <Route path="/apply" element={<ApplyPage />} />
             <Route path="/apply/status" element={<ApplyStatusPage />} />
             <Route path="/businesses/register" element={<BusinessRegisterPage />} />
+            <Route path="/outcomes" element={<OutcomesBoardPage />} />
+            <Route path="/outcomes/:slug" element={<ShowcasePage />} />
+            <Route path="/verify" element={<VerifyPage />} />
+            <Route path="/certificates/:code" element={<CertificatePage />} />
             <Route path="/signin" element={<SignInPage />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
             <Route path="*" element={<NotFoundPage />} />
@@ -104,6 +114,22 @@ export default function App() {
               element={
                 <ProtectedRoute allowedRoles={['admin']}>
                   <BusinessesAdminPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/showcase"
+              element={
+                <ProtectedRoute allowedRoles={['admin', 'instructor']}>
+                  <ShowcaseAdminPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/teach/cohorts/:id/roster"
+              element={
+                <ProtectedRoute allowedRoles={['admin', 'instructor']}>
+                  <CohortRosterPage />
                 </ProtectedRoute>
               }
             />

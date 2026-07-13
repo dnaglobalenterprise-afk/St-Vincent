@@ -7,7 +7,7 @@ export async function resolveMemberRoom(userId: string): Promise<Room | null> {
     .from('enrollments')
     .select('cohorts(room_id)')
     .eq('user_id', userId)
-    .eq('status', 'active')
+    .in('status', ['active', 'graduated'])
     .limit(1)
     .maybeSingle()
   const roomId = (enrollment as { cohorts?: { room_id: string | null } } | null)?.cohorts?.room_id

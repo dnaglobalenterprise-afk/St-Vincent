@@ -56,6 +56,7 @@ export function Sidebar() {
     ...(role === 'admin' || role === 'instructor'
       ? [
           { to: '/teach/capstones', label: 'Capstones', icon: Award },
+          { to: '/admin/showcase', label: 'Showcase', icon: Clapperboard },
           { to: '/teach/classes', label: 'Manage Classes', icon: CalendarDays },
           { to: '/teach/review', label: 'Review', icon: ClipboardCheck },
           { to: '/admin/applications', label: 'Applications', icon: Inbox },

@@ -306,9 +306,53 @@ export type CapstoneReview = {
   created_at: string
 }
 
+export type ShowcaseStatus = 'awaiting_student' | 'approved' | 'published' | 'declined'
+
+export type ShowcaseEntry = {
+  id: string
+  project_id: string
+  status: ShowcaseStatus
+  slug: string | null
+  headline: string | null
+  narrative: string | null
+  photo_path: string | null
+  student_consent: boolean
+  consented_at: string | null
+  display_name: string | null
+  project_type: CapstoneType | null
+  business_name: string | null
+  island: string | null
+  video_url: string | null
+  published_at: string | null
+  published_by: string | null
+  created_at: string
+  updated_at: string
+}
+
+export type Certificate = {
+  id: string
+  user_id: string
+  cohort_id: string
+  code: string
+  issued_at: string
+  issued_by: string
+}
+
 export type Database = {
   public: {
     Tables: {
+      showcase_entries: {
+        Row: ShowcaseEntry
+        Insert: never
+        Update: Partial<ShowcaseEntry>
+        Relationships: []
+      }
+      certificates: {
+        Row: Certificate
+        Insert: never
+        Update: never
+        Relationships: []
+      }
       business_partners: {
         Row: BusinessPartner
         Insert: Pick<BusinessPartner, 'name' | 'business_type' | 'community' | 'island' | 'pain_point' | 'consent'> &
@@ -555,6 +599,38 @@ export type Database = {
       get_business_contact: {
         Args: { p_project_id: string }
         Returns: { contact_name: string; email: string; whatsapp: string }[]
+      }
+      approve_showcase: {
+        Args: { p_entry_id: string; p_narrative: string; p_photo_path: string }
+        Returns: undefined
+      }
+      decline_showcase: {
+        Args: { p_entry_id: string }
+        Returns: undefined
+      }
+      publish_showcase: {
+        Args: { p_entry_id: string; p_slug: string; p_headline: string }
+        Returns: undefined
+      }
+      unpublish_showcase: {
+        Args: { p_entry_id: string }
+        Returns: undefined
+      }
+      is_graduation_eligible: {
+        Args: { p_user_id: string }
+        Returns: boolean
+      }
+      graduate_student: {
+        Args: { p_user_id: string }
+        Returns: string
+      }
+      verify_certificate: {
+        Args: { p_code: string }
+        Returns: { holder_name: string; cohort_name: string; issued_at: string }[]
+      }
+      get_outcome_stats: {
+        Args: Record<string, never>
+        Returns: { graduates: number; deployed: number; businesses: number }[]
       }
       is_module_unlocked: {
         Args: { p_module_id: string }

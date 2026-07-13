@@ -253,3 +253,64 @@ from public.profiles p, public.business_partners b
 where p.email='student@test.local' and b.name='Grenadines Tours Co'
   and exists (select 1 from public.enrollments e where e.user_id = p.id and e.status='active')
   and not exists (select 1 from public.capstone_projects cp where cp.user_id = p.id);
+
+-- ============================================
+-- PRD 07 seed: verified capstone -> published showcase -> graduated + certificate
+-- ============================================
+
+-- Ensure the test student is enrolled
+insert into public.enrollments (cohort_id, user_id, status)
+select c.id, p.id, 'active' from public.cohorts c, public.profiles p
+where c.name = 'Cohort 1 — 2026' and p.email = 'student@test.local'
+on conflict do nothing;
+
+-- Complete every required published lesson for the student (so graduation is eligible)
+insert into public.lesson_progress (lesson_id, user_id)
+select l.id, p.id
+from public.lessons l
+join public.modules m on m.id = l.module_id
+join public.courses c on c.id = m.course_id
+join public.rooms r on r.id = c.room_id and r.slug = 'ai-automation'
+join public.profiles p on p.email = 'student@test.local'
+where l.required and l.published
+on conflict do nothing;
+
+-- A verified capstone at Grenadines Tours (the trigger creates the showcase shell)
+insert into public.capstone_projects
+  (user_id, business_id, cohort_id, type, status, pitch, video_url, live_proof, narrative, submitted_at, matched_at, verified_at, verified_by)
+select p.id, b.id,
+       (select cohort_id from public.enrollments e where e.user_id = p.id and e.status='active' limit 1),
+       'whatsapp_bot', 'verified',
+       'A WhatsApp bot that answers tour inquiries instantly and captures bookings into one sheet.',
+       'https://www.loom.com/share/example-capstone-walkthrough',
+       '+17845550133',
+       'This WhatsApp bot for Grenadines Tours greets every inquiry within seconds, answers the most common questions, quotes the standard tours, and drops the customer name, date, and party size into one sheet the owner checks each morning. In its first test week it handled fourteen inquiries with zero missed messages — turning lost bookings into confirmed ones.',
+       now() - interval '2 days', now() - interval '6 days', now() - interval '1 day', p.id
+from public.profiles p, public.business_partners b
+where p.email='student@test.local' and b.name='Grenadines Tours Co'
+  and not exists (select 1 from public.capstone_projects cp where cp.user_id = p.id);
+
+-- Publish the showcase entry directly (the verified-capstone trigger only fires
+-- on UPDATE, so a directly-seeded verified capstone has no shell yet).
+insert into public.showcase_entries
+  (project_id, status, slug, headline, narrative, student_consent, consented_at,
+   display_name, project_type, business_name, island, video_url, published_at, published_by)
+select cp.id, 'published', 'stu-e-whatsapp-bot-union-island',
+  'A WhatsApp bot that turns missed messages into booked tours',
+  cp.narrative, true, now(),
+  p.first_name || ' ' || left(coalesce(p.last_name,''),1) || '.',
+  'whatsapp_bot', 'Grenadines Tours Co', 'Union Island', cp.video_url,
+  now(), (select id from public.profiles where email='admin@test.local')
+from public.capstone_projects cp join public.profiles p on p.id=cp.user_id
+where p.email='student@test.local' and cp.status='verified'
+on conflict (project_id) do nothing;
+
+-- Graduate the student + issue a certificate
+update public.enrollments set status='graduated'
+where user_id=(select id from public.profiles where email='student@test.local') and status='active';
+
+insert into public.certificates (user_id, cohort_id, code, issued_by)
+select p.id, c.id, 'SVGAI-DEMO1', (select id from public.profiles where email='admin@test.local')
+from public.profiles p, public.cohorts c
+where p.email='student@test.local' and c.name='Cohort 1 — 2026'
+on conflict do nothing;

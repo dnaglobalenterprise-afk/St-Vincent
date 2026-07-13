@@ -6,6 +6,7 @@ import { Button } from '../ui/Button'
 const NAV_LINKS = [
   { to: '/', label: 'Home' },
   { to: '/program', label: 'Program' },
+  { to: '/outcomes', label: 'Outcomes' },
   { to: '/businesses', label: 'For Businesses' },
   { to: '/about', label: 'About' },
   { to: '/faq', label: 'FAQ' },
@@ -46,7 +47,7 @@ export function Navbar() {
 
   return (
     <header
-      className={`sticky top-0 z-30 border-b border-line bg-white ${scrolled ? 'shadow-card' : ''}`}
+      className={`sticky top-0 z-30 border-b border-line bg-white print:hidden ${scrolled ? 'shadow-card' : ''}`}
     >
       <nav className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
         <Link to="/" className="flex items-center gap-2">

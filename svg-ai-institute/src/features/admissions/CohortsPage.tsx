@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
-import { CalendarDays, Pencil, Plus } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { CalendarDays, Pencil, Plus, Users } from 'lucide-react'
 import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
 import { Card } from '../../components/ui/Card'
@@ -187,6 +188,13 @@ export function CohortsPage() {
                       style={{ width: `${pct}%` }}
                     />
                   </div>
+                </div>
+                <div className="mt-4">
+                  <Link to={`/teach/cohorts/${cohort.id}/roster`}>
+                    <Button variant="secondary" size="sm">
+                      <Users className="h-4 w-4" aria-hidden="true" /> Roster &amp; graduation
+                    </Button>
+                  </Link>
                 </div>
               </Card>
             )

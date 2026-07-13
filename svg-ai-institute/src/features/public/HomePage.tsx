@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { BadgeCheck, MessageCircle, Mic, Workflow } from 'lucide-react'
 import { Badge } from '../../components/ui/Badge'
@@ -5,6 +6,10 @@ import { Button } from '../../components/ui/Button'
 import { Card } from '../../components/ui/Card'
 import { DiamondMotif } from '../../components/ui/DiamondMotif'
 import { Seo } from '../../components/ui/Seo'
+import { supabase } from '../../lib/supabase'
+import type { ShowcaseEntry } from '../../lib/types'
+import { DeployedBadge } from '../outcomes/DeployedBadge'
+import { PUBLIC_SHOWCASE_COLUMNS, typeLabel } from '../outcomes/outcomes'
 
 const STATS = [
   {
@@ -56,6 +61,54 @@ const BUILDS = [
     copy: 'Agents that answer calls, take bookings, and text customers back.',
   },
 ]
+
+function OutcomesTeaser() {
+  const [stats, setStats] = useState<{ graduates: number; deployed: number; businesses: number } | null>(null)
+  const [entries, setEntries] = useState<ShowcaseEntry[]>([])
+
+  useEffect(() => {
+    Promise.all([
+      supabase.rpc('get_outcome_stats'),
+      supabase.from('showcase_entries').select(PUBLIC_SHOWCASE_COLUMNS).eq('status', 'published').order('published_at', { ascending: false }).limit(3),
+    ]).then(([{ data: s }, { data: e }]) => {
+      if (s && s.length > 0) setStats(s[0])
+      setEntries((e ?? []) as ShowcaseEntry[])
+    })
+  }, [])
+
+  if (!stats || stats.deployed === 0) return null
+
+  return (
+    <section className="bg-surface-page">
+      <div className="mx-auto max-w-6xl px-4 py-16">
+        <div className="flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-end">
+          <div>
+            <h2 className="font-heading text-2xl font-semibold text-ink">Real proof, already shipping</h2>
+            <p className="mt-1 text-base text-ink-muted">
+              {stats.deployed} system{stats.deployed === 1 ? '' : 's'} deployed · {stats.graduates} graduate
+              {stats.graduates === 1 ? '' : 's'} · {stats.businesses} business{stats.businesses === 1 ? '' : 'es'} served
+            </p>
+          </div>
+          <Link to="/outcomes" className="font-medium text-svgblue-500 hover:text-svgblue-700">See the Outcomes Board →</Link>
+        </div>
+        <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-3">
+          {entries.map((e) => (
+            <Link key={e.id} to={`/outcomes/${e.slug}`}>
+              <Card className="h-full">
+                <div className="flex items-center gap-2">
+                  <DeployedBadge />
+                </div>
+                <p className="mt-2 font-heading text-lg font-semibold text-ink">{e.display_name}</p>
+                <p className="text-sm text-ink-muted">{typeLabel(e.project_type)} · {e.business_name}, {e.island}</p>
+                {e.headline && <p className="mt-2 text-base text-ink">{e.headline}</p>}
+              </Card>
+            </Link>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
 
 export function HomePage() {
   return (
@@ -187,6 +240,9 @@ export function HomePage() {
           </Card>
         </div>
       </section>
+
+      {/* Outcomes teaser (only when there are published entries) */}
+      <OutcomesTeaser />
 
       {/* 6. For businesses strip */}
       <section className="bg-svggreen-100">

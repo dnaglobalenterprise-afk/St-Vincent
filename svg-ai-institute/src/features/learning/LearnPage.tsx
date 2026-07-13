@@ -10,6 +10,7 @@ import {
   Play,
 } from 'lucide-react'
 import { Badge } from '../../components/ui/Badge'
+import { supabase } from '../../lib/supabase'
 import { Button } from '../../components/ui/Button'
 import { Card } from '../../components/ui/Card'
 import { EmptyState } from '../../components/ui/EmptyState'
@@ -32,6 +33,7 @@ export function LearnPage() {
   const navigate = useNavigate()
   const [data, setData] = useState<ProgramData | null>(null)
   const [loaded, setLoaded] = useState(false)
+  const [graduated, setGraduated] = useState(false)
   const [openModules, setOpenModules] = useState<Set<string>>(new Set())
 
   useEffect(() => {
@@ -47,6 +49,16 @@ export function LearnPage() {
         if (currentId) setOpenModules(new Set([currentId]))
       }
     })
+    supabase
+      .from('enrollments')
+      .select('status')
+      .eq('user_id', profile.id)
+      .eq('status', 'graduated')
+      .limit(1)
+      .maybeSingle()
+      .then(({ data: grad }) => {
+        if (!cancelled) setGraduated(!!grad)
+      })
     return () => {
       cancelled = true
     }
@@ -83,9 +95,12 @@ export function LearnPage() {
   return (
     <div className="flex flex-col gap-8">
       <div className="flex flex-col gap-4">
-        <p className="text-sm font-medium uppercase tracking-wide text-svgblue-500">
-          {data.room.name}
-        </p>
+        <div className="flex items-center gap-3">
+          <p className="text-sm font-medium uppercase tracking-wide text-svgblue-500">
+            {data.room.name}
+          </p>
+          {graduated && <Badge variant="green">🎓 Graduate</Badge>}
+        </div>
         <h1 className="font-heading text-3xl font-bold text-ink">{data.course.title}</h1>
         <div className="flex flex-col gap-2">
           <div className="flex items-center justify-between text-sm">
