@@ -1,0 +1,50 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Sora:wght@600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Primary — SVG Blue (sky, sea) */
+  --svg-blue-900: #0b2540;
+  --svg-blue-700: #0059a8;
+  --svg-blue-500: #0072c6;
+  --svg-blue-100: #d6ebfa;
+  --svg-blue-50: #f0f8ff;
+
+  /* Accent — SVG Gold (sunshine, energy) */
+  --svg-gold-600: #e0b500;
+  --svg-gold-500: #fcd116;
+  --svg-gold-100: #fef6d0;
+
+  /* Success / Growth — SVG Green (the islands) */
+  --svg-green-700: #007a2f;
+  --svg-green-500: #009639;
+  --svg-green-100: #d9f2e2;
+
+  /* Neutrals — bright base */
+  --surface-page: #ffffff;
+  --surface-alt: #f5f9fc;
+  --border: #e2ecf4;
+  --text-primary: #0b2540;
+  --text-muted: #5a7184;
+
+  /* Semantic */
+  --danger: #d64545;
+  --warning: #e8890c;
+}
+
+@layer base {
+  body {
+    @apply bg-surface-page text-ink font-body;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-heading;
+  }
+}
