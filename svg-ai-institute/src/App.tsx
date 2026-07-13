@@ -26,6 +26,7 @@ import { BusinessesAdminPage } from './features/capstone/BusinessesAdminPage'
 import { CapstoneHubPage } from './features/capstone/CapstoneHubPage'
 import { CapstonesReviewPage } from './features/capstone/CapstonesReviewPage'
 import { PartnerPortalPage } from './features/capstone/PartnerPortalPage'
+import { CoachPage } from './features/coach/CoachPage'
 import { CommunityPage } from './features/community/CommunityPage'
 import { LeaderboardPage } from './features/gamification/LeaderboardPage'
 import { OutcomesBoardPage } from './features/outcomes/OutcomesBoardPage'
@@ -97,6 +98,7 @@ export default function App() {
             <Route path="/learn/capstone" element={<CapstoneHubPage />} />
             <Route path="/community" element={<CommunityPage />} />
             <Route path="/learn/leaderboard" element={<LeaderboardPage />} />
+            <Route path="/learn/coach" element={<CoachPage />} />
             <Route
               path="/partner"
               element={

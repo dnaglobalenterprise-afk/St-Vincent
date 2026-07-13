@@ -12,6 +12,7 @@ import {
   MessagesSquare,
   Rocket,
   School,
+  Sparkles,
   Trophy,
   Video,
 } from 'lucide-react'
@@ -53,6 +54,7 @@ export function Sidebar() {
           { to: '/learn', label: 'Program', icon: BookOpen },
           { to: '/learn/capstone', label: 'Capstone', icon: Rocket },
           { to: '/learn/leaderboard', label: 'Leaderboard', icon: Trophy },
+          { to: '/learn/coach', label: 'Coach', icon: Sparkles },
           { to: '/community', label: 'Community', icon: MessagesSquare },
           { to: '/learn/classes', label: 'Classes', icon: Video },
           { to: '/learn/replays', label: 'Replays', icon: Clapperboard },

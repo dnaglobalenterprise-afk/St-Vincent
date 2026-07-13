@@ -416,9 +416,35 @@ export type BadgeAward = {
   awarded_at: string
 }
 
+export type CoachConversation = {
+  id: string
+  user_id: string
+  room_id: string
+  title: string | null
+  created_at: string
+  updated_at: string
+}
+
+export type CoachMessage = {
+  id: string
+  conversation_id: string
+  role: 'user' | 'assistant'
+  content: string
+  input_tokens: number | null
+  output_tokens: number | null
+  created_at: string
+}
+
 export type Database = {
   public: {
     Tables: {
+      coach_conversations: {
+        Row: CoachConversation
+        Insert: never
+        Update: { title?: string | null }
+        Relationships: []
+      }
+      coach_messages: { Row: CoachMessage; Insert: never; Update: never; Relationships: [] }
       point_events: { Row: PointEvent; Insert: never; Update: never; Relationships: [] }
       streaks: { Row: Streak; Insert: never; Update: never; Relationships: [] }
       badges: { Row: BadgeDef; Insert: never; Update: never; Relationships: [] }
@@ -760,6 +786,7 @@ export type Database = {
         Args: { p_room_id: string }
         Returns: { id: string; name: string; role: Role; cohort: string | null }[]
       }
+      coach_messages_today: { Args: { p_user_id: string }; Returns: number }
       user_points: { Args: { p_user_id: string }; Returns: number }
       user_level: { Args: { p_points: number }; Returns: number }
       get_leaderboard: {

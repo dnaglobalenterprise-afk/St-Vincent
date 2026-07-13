@@ -10,6 +10,7 @@ import {
   Lock,
   Play,
   SearchX,
+  Sparkles,
 } from 'lucide-react'
 import { Badge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
@@ -229,6 +230,15 @@ export function LessonPlayerPage() {
           </ul>
         </Card>
       </aside>
+
+      {/* Ask Vincy — opens the coach with this lesson pre-loaded as context */}
+      <Link
+        to={`/learn/coach?lesson=${lessonId}&lessonTitle=${encodeURIComponent(content.title)}`}
+        className="fixed bottom-24 right-4 z-20 flex items-center gap-2 rounded-full bg-svggold-500 px-4 py-3 font-heading text-base font-semibold text-ink shadow-card transition-transform duration-150 hover:scale-105 md:bottom-6"
+      >
+        <Sparkles className="h-5 w-5" aria-hidden="true" />
+        Ask Vincy
+      </Link>
     </div>
   )
 }

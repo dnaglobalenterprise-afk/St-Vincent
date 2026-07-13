@@ -428,3 +428,25 @@ do $$ declare r record; begin
     perform public.award_badge(r.user_id, 'graduate');
   end loop;
 end $$;
+
+-- ============================================
+-- PRD 10 seed: one coach conversation with 3 messages for the test student
+-- ============================================
+do $$
+declare v_user uuid; v_room uuid; v_conv uuid;
+begin
+  select id into v_user from public.profiles where email='student@test.local';
+  select r.id into v_room from public.rooms r where r.slug='ai-automation';
+  if v_user is null or v_room is null then return; end if;
+
+  select id into v_conv from public.coach_conversations where user_id=v_user limit 1;
+  if v_conv is null then
+    insert into public.coach_conversations (user_id, room_id, title)
+      values (v_user, v_room, 'Explain this week''s big idea like I''m brand new')
+      returning id into v_conv;
+    insert into public.coach_messages (conversation_id, role, content, input_tokens, output_tokens) values
+      (v_conv, 'user', 'Explain this week''s big idea like I''m brand new', null, null),
+      (v_conv, 'assistant', 'Great question! This week is about **automation thinking** — spotting a repetitive task a business does by hand and letting software do it instead. Think of a barber who texts every client a reminder the night before. That''s a trigger (it''s the evening) plus an action (send the text). Once you see tasks as trigger → action, you can automate almost anything. What''s a task you''ve seen a local business repeat over and over?', 320, 95),
+      (v_conv, 'user', 'A restaurant taking orders on WhatsApp one by one.', null, null);
+  end if;
+end $$;

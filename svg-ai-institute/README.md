@@ -77,3 +77,26 @@ supabase/
 ## Design law
 
 The interface is **bright** — white and light-blue pages carrying the SVG national colors (blue `#0072C6`, gold `#FCD116`, green `#009639`). No dark backgrounds, ever. All colors come from the Tailwind theme tokens in `tailwind.config.ts`; components never use raw hex values.
+
+## AI Study Coach (Vincy) — cost & abuse knobs
+
+The coach runs entirely through the `coach-chat` Edge Function, which holds the
+Anthropic key (`ANTHROPIC_API_KEY` — a Supabase function secret, never bundled).
+Four constants at the top of `supabase/functions/coach-chat/index.ts` bound the
+worst-case cost; at 30 students the monthly spend stays in the tens of dollars:
+
+| Knob | Default | Purpose |
+|---|---|---|
+| `DAILY_CAP` | 30 | Coach messages per student per AST day (the coach's only rate limiter). |
+| `MAX_TOKENS` | 1024 | Response ceiling per reply. |
+| `HISTORY_WINDOW` | 20 | Prior messages sent to the model. |
+| `CONTEXT_CHAR_BUDGET` | 48000 | ~12k-token context cap; video descriptions drop first, then lesson bodies truncate. |
+
+Guardrails live in the server-side system prompt (never sent to the client):
+Vincy won't write submittable work, never has quiz answers (`quiz_questions` is
+never queried — quiz lessons contribute their title only), and stays on program
+topics. Coach chats are private even from staff (no staff RLS policy).
+
+**Setup:** paste an Anthropic key into `ANTHROPIC_API_KEY` in `.env.local`, then
+push it to the function secret. Until it's set, the coach returns a graceful
+"not configured yet" message instead of erroring.
