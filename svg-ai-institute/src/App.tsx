@@ -14,6 +14,7 @@ import { CohortsPage } from './features/admissions/CohortsPage'
 import { CourseBuilderPage } from './features/learning/CourseBuilderPage'
 import { LearnPage } from './features/learning/LearnPage'
 import { LessonPlayerPage } from './features/learning/LessonPlayerPage'
+import { ReviewQueuePage } from './features/learning/ReviewQueuePage'
 import { RoomDetailPage } from './features/learning/RoomDetailPage'
 import { RoomsPage } from './features/learning/RoomsPage'
 import { AboutPage } from './features/public/AboutPage'
@@ -67,6 +68,14 @@ export default function App() {
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/learn" element={<LearnPage />} />
             <Route path="/learn/lesson/:lessonId" element={<LessonPlayerPage />} />
+            <Route
+              path="/teach/review"
+              element={
+                <ProtectedRoute allowedRoles={['admin', 'instructor']}>
+                  <ReviewQueuePage />
+                </ProtectedRoute>
+              }
+            />
             <Route
               path="/admin/rooms"
               element={

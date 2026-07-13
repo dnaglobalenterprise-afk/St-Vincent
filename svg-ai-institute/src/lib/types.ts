@@ -129,6 +129,7 @@ export type Lesson = {
   video_status: VideoStatus
   duration_seconds: number | null
   pass_threshold: number | null
+  submission_kinds: SubmissionKind[]
   created_at: string
   updated_at: string
 }
@@ -170,6 +171,24 @@ export type LessonContent = {
   duration_seconds: number | null
   pass_threshold: number | null
   questions: { id: string; prompt: string; options: string[]; sort_order: number }[]
+}
+
+export type SubmissionKind = 'link' | 'text' | 'file'
+export type SubmissionStatus = 'submitted' | 'changes_requested' | 'approved'
+
+export type Submission = {
+  id: string
+  lesson_id: string
+  user_id: string
+  attempt_number: number
+  status: SubmissionStatus
+  links: string[]
+  text_body: string | null
+  file_paths: string[]
+  feedback: string | null
+  reviewed_by: string | null
+  reviewed_at: string | null
+  created_at: string
 }
 
 export type Database = {
@@ -317,6 +336,19 @@ export type Database = {
       }
       mark_lesson_complete: {
         Args: { p_lesson_id: string }
+        Returns: undefined
+      }
+      submit_assignment: {
+        Args: {
+          p_lesson_id: string
+          p_links: string[]
+          p_text_body: string | null
+          p_file_paths: string[]
+        }
+        Returns: string
+      }
+      review_submission: {
+        Args: { p_submission_id: string; p_decision: SubmissionStatus; p_feedback: string }
         Returns: undefined
       }
       is_module_unlocked: {

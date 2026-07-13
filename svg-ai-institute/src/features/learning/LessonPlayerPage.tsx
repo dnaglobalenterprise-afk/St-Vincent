@@ -19,6 +19,7 @@ import { Spinner } from '../../components/ui/Spinner'
 import { supabase } from '../../lib/supabase'
 import type { LessonContent, LessonType } from '../../lib/types'
 import { useAuth } from '../auth/useAuth'
+import { AssignmentLesson } from './AssignmentLesson'
 import { Markdown } from './Markdown'
 import { LESSON_META_COLUMNS } from './program'
 import type { LessonMeta } from './program'
@@ -168,6 +169,9 @@ export function LessonPlayerPage() {
           )}
           {content.type === 'quiz' && (
             <QuizLesson content={content} isComplete={isComplete} onPassed={() => void load()} />
+          )}
+          {content.type === 'assignment' && (
+            <AssignmentLesson content={content} onApproved={() => void load()} />
           )}
         </div>
 

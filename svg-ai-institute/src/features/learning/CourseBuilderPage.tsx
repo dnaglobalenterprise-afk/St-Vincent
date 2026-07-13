@@ -5,6 +5,7 @@ import {
   ArrowDown,
   ArrowUp,
   BookOpen,
+  ClipboardCheck,
   FileText,
   HelpCircle,
   Play,
@@ -21,15 +22,21 @@ import { Modal } from '../../components/ui/Modal'
 import { PageHeader } from '../../components/ui/PageHeader'
 import { Spinner } from '../../components/ui/Spinner'
 import { supabase } from '../../lib/supabase'
-import type { Course, Lesson, LessonType, Module, QuizQuestion } from '../../lib/types'
+import type { Course, Lesson, LessonType, Module, QuizQuestion, SubmissionKind } from '../../lib/types'
 import { Markdown } from './Markdown'
 
 const TYPE_ICONS: Record<LessonType, typeof Play> = {
   video: Play,
   text: FileText,
   quiz: HelpCircle,
-  assignment: FileText,
+  assignment: ClipboardCheck,
   replay: Play,
+}
+
+const SUBMISSION_KIND_LABELS: Record<SubmissionKind, string> = {
+  link: 'Link (Make/n8n share URL, Loom, etc.)',
+  text: 'Text write-up',
+  file: 'File upload (screenshots, exports, PDFs)',
 }
 
 /** Swap sort_order between two rows without tripping the unique constraint. */
@@ -418,6 +425,9 @@ function LessonEditor({
   const [body, setBody] = useState(lesson?.body_markdown ?? '')
   const [required, setRequired] = useState(lesson?.required ?? true)
   const [threshold, setThreshold] = useState(String(lesson?.pass_threshold ?? 70))
+  const [submissionKinds, setSubmissionKinds] = useState<SubmissionKind[]>(
+    (lesson?.submission_kinds as SubmissionKind[]) ?? [],
+  )
   const [preview, setPreview] = useState(false)
   const [questions, setQuestions] = useState<EditorQuestion[]>([])
   const [saving, setSaving] = useState(false)
@@ -455,6 +465,16 @@ function LessonEditor({
       setError('Text lessons need a body.')
       return
     }
+    if (type === 'assignment') {
+      if (!body.trim()) {
+        setError('Assignments need instructions.')
+        return
+      }
+      if (submissionKinds.length === 0) {
+        setError('Choose at least one accepted submission kind.')
+        return
+      }
+    }
     if (type === 'quiz') {
       if (questions.length === 0) {
         setError('Add at least one question.')
@@ -476,6 +496,7 @@ function LessonEditor({
       required,
       body_markdown: type !== 'quiz' ? body || null : null,
       pass_threshold: type === 'quiz' ? Number(threshold) || 70 : null,
+      submission_kinds: type === 'assignment' ? submissionKinds : [],
     }
     if (lessonId) {
       const { error: err } = await supabase.from('lessons').update(base).eq('id', lessonId)
@@ -553,8 +574,8 @@ function LessonEditor({
   if (!type) {
     return (
       <Modal title="Add lesson" open onClose={onClose}>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-          {(['video', 'text', 'quiz'] as const).map((t) => {
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {(['video', 'text', 'quiz', 'assignment'] as const).map((t) => {
             const Icon = TYPE_ICONS[t]
             return (
               <button
@@ -662,6 +683,52 @@ function LessonEditor({
               />
             )}
           </div>
+        )}
+
+        {type === 'assignment' && (
+          <>
+            <div className="flex w-full flex-col gap-1.5">
+              <div className="flex items-center justify-between">
+                <label htmlFor="lesson-body" className="text-sm font-medium text-ink">
+                  Instructions (markdown) — end with a checklist
+                </label>
+                <Button variant="ghost" size="sm" onClick={() => setPreview((p) => !p)}>
+                  {preview ? 'Edit' : 'Preview'}
+                </Button>
+              </div>
+              {preview ? (
+                <div className="rounded-xl border border-line bg-white px-4 py-3">
+                  <Markdown source={body} />
+                </div>
+              ) : (
+                <textarea
+                  id="lesson-body"
+                  rows={10}
+                  value={body}
+                  onChange={(e) => setBody(e.target.value)}
+                  className="w-full rounded-xl border border-line bg-white px-4 py-2 font-mono text-sm text-ink focus:outline-none focus:ring-2 focus:ring-svgblue-500"
+                />
+              )}
+            </div>
+            <div className="flex flex-col gap-2">
+              <p className="text-sm font-medium text-ink">Accepted submission kinds (at least one)</p>
+              {(['link', 'text', 'file'] as const).map((kind) => (
+                <label key={kind} className="flex items-center gap-2 text-base text-ink">
+                  <input
+                    type="checkbox"
+                    checked={submissionKinds.includes(kind)}
+                    onChange={(e) =>
+                      setSubmissionKinds((ks) =>
+                        e.target.checked ? [...ks, kind] : ks.filter((k) => k !== kind),
+                      )
+                    }
+                    className="h-4 w-4"
+                  />
+                  {SUBMISSION_KIND_LABELS[kind]}
+                </label>
+              ))}
+            </div>
+          </>
         )}
 
         {type === 'quiz' && (

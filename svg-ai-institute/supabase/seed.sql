@@ -112,3 +112,52 @@ join public.courses c on c.id = mo.course_id
 join public.rooms r on r.id = c.room_id and r.slug = 'ai-automation'
 where mo.sort_order between 2 and 8
   and not exists (select 1 from public.lessons l where l.module_id = mo.id);
+
+-- ============================================
+-- PRD 04 seed: assignment lessons + one submitted submission
+-- ============================================
+
+-- Week 1 assignment (link + file + text)
+insert into public.lessons (module_id, type, title, sort_order, required, published, body_markdown, submission_kinds)
+select mo.id, 'assignment',
+       'Build your first prompt-powered helper',
+       10, true, true,
+       E'# Build your first prompt-powered helper\n\nUse Claude or ChatGPT to build a small helper that solves a real task for a person you know (a checklist generator, a message rewriter, a study-quiz maker — your call).\n\n## What to submit\n\n- A **link** to your working prompt (a shareable chat link or a Loom walkthrough), and\n- A **screenshot** of it working, and\n- A short **write-up**: who it is for and what problem it solves.\n\n## Done looks like\n\n- [ ] The helper does something genuinely useful\n- [ ] Someone other than you could run it from your instructions\n- [ ] You can explain why your prompt is written the way it is',
+       array['link','file','text']
+from public.modules mo
+join public.courses c on c.id = mo.course_id
+join public.rooms r on r.id = c.room_id and r.slug='ai-automation'
+where mo.sort_order = 1
+  and not exists (select 1 from public.lessons l where l.module_id = mo.id and l.type='assignment');
+
+-- Week 3 assignment (link only)
+insert into public.lessons (module_id, type, title, sort_order, required, published, body_markdown, submission_kinds)
+select mo.id, 'assignment',
+       'Ship your first Make scenario',
+       10, true, true,
+       E'# Ship your first Make scenario\n\nBuild a Make.com scenario that automates one repetitive task end to end.\n\n## What to submit\n\n- The **share link** to your scenario.\n\n## Done looks like\n\n- [ ] The scenario runs without errors\n- [ ] It saves a real person real time',
+       array['link']
+from public.modules mo
+join public.courses c on c.id = mo.course_id
+join public.rooms r on r.id = c.room_id and r.slug='ai-automation'
+where mo.sort_order = 3
+  and not exists (select 1 from public.lessons l where l.module_id = mo.id and l.type='assignment');
+
+-- Enroll the test student and seed one submitted Week-1 assignment submission
+-- so the instructor review queue renders immediately.
+insert into public.enrollments (cohort_id, user_id, status)
+select c.id, p.id, 'active'
+from public.cohorts c, public.profiles p
+where c.name = 'Cohort 1 — 2026' and p.email = 'student@test.local'
+on conflict do nothing;
+
+insert into public.submissions (lesson_id, user_id, attempt_number, links, text_body, file_paths)
+select l.id, p.id, 1,
+       '["https://claude.ai/share/example-helper"]'::jsonb,
+       'This helper writes friendly appointment-reminder messages for my aunt''s hair salon. Staff paste the client name and time, and it returns a warm WhatsApp-ready message.',
+       '[]'::jsonb
+from public.lessons l
+join public.modules mo on mo.id = l.module_id and mo.sort_order = 1
+join public.profiles p on p.email = 'student@test.local'
+where l.type = 'assignment'
+  and not exists (select 1 from public.submissions s where s.lesson_id = l.id and s.user_id = p.id);
