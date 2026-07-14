@@ -825,6 +825,57 @@ export type Database = {
         Returns: { id: string; name: string; role: Role; cohort: string | null }[]
       }
       coach_messages_today: { Args: { p_user_id: string }; Returns: number }
+      get_admin_funnel: {
+        Args: Record<string, never>
+        Returns: {
+          interest: number; applications: number; accepted: number
+          enrolled_active: number; graduated: number
+          by_status: Record<string, number>
+          weekly: { week_start: string; count: number }[]
+        }[]
+      }
+      get_cohort_health: {
+        Args: Record<string, never>
+        Returns: {
+          cohort_id: string; name: string; start_date: string | null; end_date: string | null; status: string
+          enrolled: number; capacity: number; avg_progress: number; on_track: number; slipping: number
+          cap_requested: number; cap_matched: number; cap_submitted: number; cap_verified: number; graduated: number
+        }[]
+      }
+      get_progress_matrix: {
+        Args: { p_cohort_id: string }
+        Returns: {
+          user_id: string; student_name: string
+          module_states: { module_id: string; title: string; done: number; required: number }[]
+          overall_pct: number; capstone_status: string; current_streak: number; points: number
+        }[]
+      }
+      get_review_workload: {
+        Args: Record<string, never>
+        Returns: {
+          assignments_pending: number; assignments_oldest_hours: number
+          capstones_pending: number; capstones_oldest_hours: number
+          matches_pending: number; matches_oldest_hours: number
+          median_assignment_hours: number | null; median_capstone_hours: number | null
+          reviewers: { name: string; assignments: number; capstones: number; median_hours: number | null }[]
+        }[]
+      }
+      get_engagement_stats: {
+        Args: Record<string, never>
+        Returns: {
+          attendance: { title: string; date: string; attendees: number; eligible: number }[]
+          community: { by_day: { day: string; count: number }[]; posters: number }
+          coach: { by_day: { day: string; count: number }[]; users: number; avg_per_user: number }
+        }[]
+      }
+      get_ops_health: {
+        Args: Record<string, never>
+        Returns: {
+          outbox: { pending: number; failed: number; sent_24h: number; recent_failures: { domain: string; template: string; error: string; at: string }[] }
+          business: { pending: number; approved: number; capacity: number; active_projects: number }
+          content_flags: { unpublished_linked_recordings: number; stuck_processing: number }
+        }[]
+      }
       send_announcement: {
         Args: { p_room_id: string; p_cohort_id: string | null; p_title: string; p_body: string }
         Returns: number

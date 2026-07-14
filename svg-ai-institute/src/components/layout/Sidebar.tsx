@@ -63,6 +63,7 @@ export function Sidebar() {
         ]),
     ...(role === 'admin' || role === 'instructor'
       ? [
+          { to: '/admin/dashboard', label: 'Command Center', icon: LayoutDashboard },
           { to: '/teach/capstones', label: 'Capstones', icon: Award },
           { to: '/admin/showcase', label: 'Showcase', icon: Clapperboard },
           { to: '/teach/classes', label: 'Manage Classes', icon: CalendarDays },

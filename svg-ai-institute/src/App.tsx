@@ -29,6 +29,7 @@ import { PartnerPortalPage } from './features/capstone/PartnerPortalPage'
 import { CoachPage } from './features/coach/CoachPage'
 import { CommunityPage } from './features/community/CommunityPage'
 import { LeaderboardPage } from './features/gamification/LeaderboardPage'
+import { AdminDashboardPage } from './features/admin/AdminDashboardPage'
 import { NotificationsPage } from './features/notifications/NotificationsPage'
 import { SettingsNotificationsPage } from './features/notifications/SettingsNotificationsPage'
 import { AnnouncementsPage } from './features/notifications/AnnouncementsPage'
@@ -109,6 +110,14 @@ export default function App() {
               element={
                 <ProtectedRoute allowedRoles={['business_partner']}>
                   <PartnerPortalPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/dashboard"
+              element={
+                <ProtectedRoute allowedRoles={['admin', 'instructor']}>
+                  <AdminDashboardPage />
                 </ProtectedRoute>
               }
             />
