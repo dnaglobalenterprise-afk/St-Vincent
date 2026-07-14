@@ -7,6 +7,7 @@ import { EmptyState } from './components/ui/EmptyState'
 import { AuthCallback } from './features/auth/AuthCallback'
 import { AuthProvider } from './features/auth/useAuth'
 import { ProtectedRoute } from './features/auth/ProtectedRoute'
+import { ResetPasswordPage } from './features/auth/ResetPasswordPage'
 import { SignInPage } from './features/auth/SignInPage'
 import { DashboardPage } from './features/dashboard/DashboardPage'
 import { ApplicationsPage } from './features/admissions/ApplicationsPage'
@@ -83,6 +84,7 @@ export default function App() {
             <Route path="/certificates/:code" element={<CertificatePage />} />
             <Route path="/signin" element={<SignInPage />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
+            <Route path="/auth/reset" element={<ResetPasswordPage />} />
             <Route path="*" element={<NotFoundPage />} />
           </Route>
           <Route

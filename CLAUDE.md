@@ -42,7 +42,7 @@ This file is the constitution for this build. Claude Code must read and obey thi
 | Frontend | React + TypeScript + Vite | Functional components, hooks only |
 | Styling | Tailwind CSS | Design tokens from Section 4 only. No arbitrary hex values in components |
 | Backend / DB / Auth | Supabase | Postgres, Row Level Security on EVERY table containing user data, no exceptions |
-| Auth method | Supabase magic link (email OTP) | No passwords. Roles: student, instructor, admin, business_partner |
+| Auth method | Supabase email/password + magic link (email OTP) fallback | Password sign-in is the default (added 2026-07-14 per Dom); magic link kept as a no-password option. "Forgot password?" + in-app password change supported. Roles: student, instructor, admin, business_partner |
 | Hosting | Vercel | Preview deploys per PR |
 | Video (lessons + recordings) | Mux | Upload, playback, thumbnails |
 | Live classes | Embedded livestream (Mux live) + calendar scheduling. v1 may embed Zoom/Meet links as fallback; recordings always land in the room library |
