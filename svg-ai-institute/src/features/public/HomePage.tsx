@@ -13,9 +13,9 @@ import { PUBLIC_SHOWCASE_COLUMNS, typeLabel } from '../outcomes/outcomes'
 
 const STATS = [
   {
-    number: '41%',
-    numberClass: 'text-danger',
-    caption: 'youth unemployment in SVG — the problem we exist to attack',
+    number: '1',
+    numberClass: 'text-svggreen-500',
+    caption: 'real, verified project every graduate deploys at an SVG business — required to graduate',
   },
   {
     number: '8 weeks',
@@ -126,7 +126,7 @@ export function HomePage() {
         <div className="mx-auto flex max-w-6xl flex-col items-start gap-6 px-4 py-16 md:py-24">
           <Badge variant="gold">Free · Cohort-Based · Saint Vincent and the Grenadines</Badge>
           <h1 className="max-w-3xl font-heading text-3xl font-bold text-ink md:text-4xl">
-            Learn AI. Build Real Systems. Get Hired or Get Clients.
+            Learn AI. Build Real Systems. Get the Proof.
           </h1>
           <p className="max-w-2xl text-lg text-ink-muted">
             An 8-week program that trains young Vincentians to build AI automations, WhatsApp

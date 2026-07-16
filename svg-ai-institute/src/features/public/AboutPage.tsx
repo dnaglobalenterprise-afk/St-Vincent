@@ -10,7 +10,7 @@ export function AboutPage() {
     <>
       <Seo
         title="About"
-        description="Why the SVG AI Institute exists: youth unemployment in Saint Vincent and the Grenadines is near 41%. We train builders, not certificate collectors — free."
+        description="Why the SVG AI Institute exists: too many young Vincentians can't find work. We train builders, not certificate collectors — free to students — and every graduate ships a real, deployed project."
         path="/about"
       />
       <div className="mx-auto max-w-4xl px-4 py-12">
@@ -19,14 +19,14 @@ export function AboutPage() {
         {/* Mission narrative */}
         <section className="mt-8 flex max-w-3xl flex-col gap-4 text-base text-ink-muted">
           <p>
-            Youth unemployment in Saint Vincent and the Grenadines sits near{' '}
-            <span className="font-semibold text-danger">41%</span>. That is not a statistic to us —
-            it is the problem this school exists to attack.
+            Too many young Vincentians can&apos;t find work. That is not a statistic to us — it is
+            the problem this school exists to attack.
           </p>
           <p>
             AI is the biggest economic equalizer in a generation. For the first time, a young
-            Vincentian with a laptop and eight focused weeks can build systems that businesses
-            anywhere will pay for. The gap isn&apos;t talent — it&apos;s training and proof.
+            Vincentian with a laptop and eight focused weeks can build the kind of automations
+            businesses everywhere already pay for. The gap isn&apos;t talent — it&apos;s training and
+            proof.
           </p>
           <p>
             The Institute trains builders, not certificate collectors. Every student graduates with

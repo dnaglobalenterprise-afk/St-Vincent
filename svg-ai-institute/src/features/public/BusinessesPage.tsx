@@ -103,7 +103,7 @@ export function BusinessesPage() {
       <div className="mx-auto max-w-4xl px-4 py-12">
         <PageHeader
           title="Get a Free Automation for Your Business"
-          description="A supervised student builds you a WhatsApp bot, workflow automation, or voice agent — at no cost. You agree to a short discovery chat, give feedback along the way, and (with your approval) let the finished project appear on our public Outcomes Board."
+          description="A supervised student builds you a WhatsApp bot, workflow automation, or voice agent — the build is free. Any ongoing running costs (your own WhatsApp Business number, per-message fees, or hosting) belong to your business, and we spell them out in plain numbers before anything goes live. You agree to a short discovery chat, give feedback along the way, and (with your approval) let the finished project appear on our public Outcomes Board."
           action={
             <Link to="/businesses/register">
               <Button>Register your business</Button>

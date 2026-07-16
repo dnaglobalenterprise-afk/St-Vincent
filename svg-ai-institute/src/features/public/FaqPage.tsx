@@ -6,7 +6,7 @@ import { Seo } from '../../components/ui/Seo'
 const FAQS = [
   {
     q: 'How much does it cost?',
-    a: 'Nothing — the program is free at launch. Admission is by application, so places go to people who show they will finish.',
+    a: 'Students pay nothing — the program is free at launch, and the institute provides the tools and deployment credits you need during the program (no credit card required). Admission is by application, so places go to people who show they will finish.',
   },
   {
     q: 'Who can apply?',
@@ -38,7 +38,7 @@ const FAQS = [
   },
   {
     q: 'I own a business — how do I get a free automation?',
-    a: 'Register on the For Businesses page. When student matching opens, we reach out to schedule a short discovery chat.',
+    a: 'Register on the For Businesses page. When student matching opens, we reach out to schedule a short discovery chat. The build itself is free; any ongoing running costs (your WhatsApp number, per-message fees, hosting) are yours, and we explain them in plain numbers before anything goes live.',
   },
   {
     q: 'Who runs this?',
