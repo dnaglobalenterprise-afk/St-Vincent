@@ -214,27 +214,27 @@ export function HomePage() {
               do.
             </p>
           </div>
-          {/* Mock showcase card preview */}
+          {/* Illustrative example of the Outcomes Board entry format — not a real graduate */}
           <Card
             className="md:justify-self-end md:w-full md:max-w-md"
             header={
               <div className="flex items-center justify-between">
-                <span>Outcomes Board preview</span>
-                <Badge variant="green">DEPLOYED</Badge>
+                <span>Outcomes Board — example layout</span>
+                <Badge variant="gold">EXAMPLE</Badge>
               </div>
             }
           >
             <div className="flex flex-col gap-2">
-              <p className="font-heading text-xl font-semibold text-ink">Kayla J. — Cohort 1</p>
+              <p className="font-heading text-xl font-semibold text-ink-muted">Graduate name</p>
               <p className="text-base font-medium text-svgblue-500">
-                WhatsApp booking bot · Sunset View Guesthouse
+                Project type · Business name
               </p>
               <p className="text-base text-ink-muted">
-                Guests now book rooms by WhatsApp in under two minutes — no missed inquiries.
+                One line describing what the deployed automation does for the business.
               </p>
               <span className="mt-2 inline-flex items-center gap-2 text-sm font-medium text-svggreen-700">
                 <BadgeCheck className="h-4 w-4" aria-hidden="true" />
-                Verified by instructor
+                Every entry is instructor-verified before it publishes
               </span>
             </div>
           </Card>
