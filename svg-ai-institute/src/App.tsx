@@ -1,5 +1,6 @@
 import { BrowserRouter, Link, Route, Routes } from 'react-router-dom'
 import { Compass } from 'lucide-react'
+import { Analytics } from './components/Analytics'
 import { AppLayout } from './components/layout/AppLayout'
 import { PublicLayout } from './components/layout/PublicLayout'
 import { Button } from './components/ui/Button'
@@ -67,6 +68,7 @@ function NotFoundPage() {
 export default function App() {
   return (
     <BrowserRouter>
+      <Analytics />
       <AuthProvider>
         <Routes>
           <Route element={<PublicLayout />}>
