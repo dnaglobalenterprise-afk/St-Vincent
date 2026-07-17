@@ -3,6 +3,6 @@
  * production domain when it is confirmed (also update public/sitemap.xml
  * and public/robots.txt, which cannot read this constant).
  */
-export const SITE_URL = 'https://svg-ai-institute.vercel.app'
+export const SITE_URL = 'https://stvincentaiinstitute.org'
 
 export const SITE_NAME = 'SVG AI Institute'

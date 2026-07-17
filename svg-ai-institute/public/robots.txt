@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://svg-ai-institute.vercel.app/sitemap.xml
+Sitemap: https://stvincentaiinstitute.org/sitemap.xml
